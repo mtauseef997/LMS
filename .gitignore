@@ -1,0 +1,38 @@
+# PHP
+*.log
+*.tmp
+*.cache
+
+# Database
+*.sql.backup
+*.db.backup
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads directory (if it contains user uploads)
+assets/uploads/*
+!assets/uploads/.gitkeep
+
+# Config files with sensitive data (if any)
+# config/local_config.php
+
+# Composer
+vendor/
+composer.lock
+
+# Node modules (if using any frontend build tools)
+node_modules/
+package-lock.json
+
+# Environment files
+.env
+.env.local
+.env.production
