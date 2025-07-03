@@ -2,44 +2,35 @@
 session_start();
 require_once '../config/db.php';
 
-// Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: ../login.php');
     exit;
 }
 
-// Get dashboard statistics
 $stats = [];
 
-// Total users
 $result = $conn->query("SELECT COUNT(*) as count FROM users");
 $stats['total_users'] = $result->fetch_assoc()['count'];
 
-// Total students
 $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'student'");
 $stats['total_students'] = $result->fetch_assoc()['count'];
 
-// Total teachers
 $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'teacher'");
 $stats['total_teachers'] = $result->fetch_assoc()['count'];
 
-// Total classes
 $result = $conn->query("SELECT COUNT(*) as count FROM classes");
 $stats['total_classes'] = $result->fetch_assoc()['count'];
 
-// Total subjects
 $result = $conn->query("SELECT COUNT(*) as count FROM subjects");
 $stats['total_subjects'] = $result->fetch_assoc()['count'];
 
-// Total quizzes
 $result = $conn->query("SELECT COUNT(*) as count FROM quizzes");
 $stats['total_quizzes'] = $result->fetch_assoc()['count'];
 
-// Total assignments
 $result = $conn->query("SELECT COUNT(*) as count FROM assignments");
 $stats['total_assignments'] = $result->fetch_assoc()['count'];
 
-// Recent users (last 5)
+
 $recent_users = [];
 $result = $conn->query("SELECT name, email, role, created_at FROM users ORDER BY created_at DESC LIMIT 5");
 while ($row = $result->fetch_assoc()) {
@@ -63,7 +54,7 @@ while ($row = $result->fetch_assoc()) {
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
@@ -109,9 +100,7 @@ while ($row = $result->fetch_assoc()) {
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
             <header class="content-header">
                 <div class="header-left">
                     <h1>Dashboard</h1>
@@ -125,7 +114,6 @@ while ($row = $result->fetch_assoc()) {
                 </div>
             </header>
 
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">
@@ -200,7 +188,7 @@ while ($row = $result->fetch_assoc()) {
                 </div>
             </div>
 
-            <!-- Recent Activity -->
+
             <div class="content-grid" style="margin-top: 3rem;">
                 <div class="content-card">
                     <div class="card-header">
@@ -243,15 +231,15 @@ while ($row = $result->fetch_assoc()) {
                     </div>
                     <div class="card-content">
                         <div class="quick-actions">
-                            <a href="users.php?action=add" class="action-btn">
+                            <a href="manage_user.php?action=add" class="action-btn">
                                 <i class="fas fa-user-plus"></i>
                                 <span>Add User</span>
                             </a>
-                            <a href="classes.php?action=add" class="action-btn">
+                            <a href="manage_class.php?action=add" class="action-btn">
                                 <i class="fas fa-plus"></i>
                                 <span>Add Class</span>
                             </a>
-                            <a href="subjects.php?action=add" class="action-btn">
+                            <a href="manage_subject.php?action=add" class="action-btn">
                                 <i class="fas fa-book-open"></i>
                                 <span>Add Subject</span>
                             </a>

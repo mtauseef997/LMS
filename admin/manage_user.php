@@ -228,9 +228,8 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <p>Manage system users - admins, teachers, and students</p>
                 </div>
                 <div class="header-right">
-                    <button class="btn btn-primary" onclick="openCreateModal()">
-                        <i class="fas fa-plus"></i> Add New User
-                    </button>
+                    <a class="btn btn-primary" href="create_user.php">Add New User
+                    </a>
                 </div>
             </header>
             <div class="filters-section" style="margin-bottom: 2rem;">
@@ -265,53 +264,53 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
                 <div class="card-content">
                     <?php if (empty($users)): ?>
-                    <p style="text-align: center; color: #666; padding: 2rem;">
-                        No users found matching your criteria.
-                    </p>
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            No users found matching your criteria.
+                        </p>
                     <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($users as $user): ?>
-                                <tr>
-                                    <td><?php echo $user['id']; ?></td>
-                                    <td><?php echo htmlspecialchars($user['name']); ?></td>
-                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                    <td>
-                                        <span class="badge badge-<?php echo $user['role']; ?>">
-                                            <?php echo ucfirst($user['role']); ?>
-                                        </span>
-                                    </td>
-                                    <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-icon btn-edit"
-                                                onclick="editUser(<?php echo $user['id']; ?>)" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                            <button class="btn-icon btn-delete"
-                                                onclick="deleteUser(<?php echo $user['id']; ?>)" title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($users as $user): ?>
+                                        <tr>
+                                            <td><?php echo $user['id']; ?></td>
+                                            <td><?php echo htmlspecialchars($user['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                            <td>
+                                                <span class="badge badge-<?php echo $user['role']; ?>">
+                                                    <?php echo ucfirst($user['role']); ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-icon btn-edit"
+                                                        onclick="editUser(<?php echo $user['id']; ?>)" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                                        <button class="btn-icon btn-delete"
+                                                            onclick="deleteUser(<?php echo $user['id']; ?>)" title="Delete">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -361,64 +360,101 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-    function openCreateModal() {
-        document.getElementById('modalTitle').textContent = 'Add New User';
-        document.getElementById('formAction').value = 'create';
-        document.getElementById('submitBtn').textContent = 'Create User';
-        document.getElementById('passwordGroup').style.display = 'block';
-        document.getElementById('userPassword').required = true;
-        document.getElementById('userForm').reset();
-        document.getElementById('userModal').style.display = 'block';
-    }
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Add New User';
+            document.getElementById('formAction').value = 'create';
+            document.getElementById('submitBtn').textContent = 'Create User';
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('userPassword').required = true;
+            document.getElementById('userForm').reset();
+            document.getElementById('userModal').style.display = 'block';
+        }
 
-    function editUser(userId) {
-        fetch('manage_user.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: 'action=get&id=' + userId
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('modalTitle').textContent = 'Edit User';
-                    document.getElementById('formAction').value = 'update';
-                    document.getElementById('submitBtn').textContent = 'Update User';
-                    document.getElementById('passwordGroup').style.display = 'none';
-                    document.getElementById('userPassword').required = false;
-
-                    document.getElementById('userId').value = data.user.id;
-                    document.getElementById('userName').value = data.user.name;
-                    document.getElementById('userEmail').value = data.user.email;
-                    document.getElementById('userRole').value = data.user.role;
-
-                    document.getElementById('userModal').style.display = 'block';
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while fetching user data');
-            });
-    }
-
-    function deleteUser(userId) {
-        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        function editUser(userId) {
             fetch('manage_user.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=delete&id=' + userId
+                    body: 'action=get&id=' + userId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('modalTitle').textContent = 'Edit User';
+                        document.getElementById('formAction').value = 'update';
+                        document.getElementById('submitBtn').textContent = 'Update User';
+                        document.getElementById('passwordGroup').style.display = 'none';
+                        document.getElementById('userPassword').required = false;
+
+                        document.getElementById('userId').value = data.user.id;
+                        document.getElementById('userName').value = data.user.name;
+                        document.getElementById('userEmail').value = data.user.email;
+                        document.getElementById('userRole').value = data.user.role;
+
+                        document.getElementById('userModal').style.display = 'block';
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while fetching user data');
+                });
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                fetch('manage_user.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: 'action=delete&id=' + userId
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the user');
+                    });
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+
+            fetch('manage_user.php', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert(data.message);
+                        closeModal();
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);
@@ -426,57 +462,20 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while deleting the user');
+                    alert('An error occurred while processing the request');
+                })
+                .finally(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 });
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('userModal');
+            if (event.target === modal) {
+                closeModal();
+            }
         }
-    }
-
-    function closeModal() {
-        document.getElementById('userModal').style.display = 'none';
-    }
-    document.getElementById('userForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        const submitBtn = document.getElementById('submitBtn');
-        const originalText = submitBtn.textContent;
-
-        submitBtn.textContent = 'Processing...';
-        submitBtn.disabled = true;
-
-        fetch('manage_user.php', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    closeModal();
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing the request');
-            })
-            .finally(() => {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            });
-    });
-
-    window.onclick = function(event) {
-        const modal = document.getElementById('userModal');
-        if (event.target === modal) {
-            closeModal();
-        }
-    }
     </script>
 </body>
 

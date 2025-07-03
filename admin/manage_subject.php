@@ -2,13 +2,11 @@
 session_start();
 require_once '../config/db.php';
 
-// Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: ../login.php');
     exit;
 }
 
-// Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
     header('Content-Type: application/json');
 
@@ -24,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Check if subject name already exists
             $query = "SELECT id FROM subjects WHERE name = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("s", $name);
@@ -34,16 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Create subject
             $query = "INSERT INTO subjects (name, description) VALUES (?, ?)";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("ss", $name, $description);
 
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Subject created successfully']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to create subject']);
-            }
+            echo json_encode([
+                'success' => $stmt->execute(),
+                'message' => $stmt->execute() ? 'Subject created successfully' : 'Failed to create subject'
+            ]);
             exit;
 
         case 'update':
@@ -56,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Check if subject name exists for other subjects
             $query = "SELECT id FROM subjects WHERE name = ? AND id != ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("si", $name, $id);
@@ -66,27 +60,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Update subject
             $query = "UPDATE subjects SET name = ?, description = ? WHERE id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("ssi", $name, $description, $id);
 
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Subject updated successfully']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to update subject']);
-            }
+            echo json_encode([
+                'success' => $stmt->execute(),
+                'message' => $stmt->execute() ? 'Subject updated successfully' : 'Failed to update subject'
+            ]);
             exit;
 
         case 'delete':
             $id = intval($_POST['id'] ?? 0);
-
             if ($id <= 0) {
                 echo json_encode(['success' => false, 'message' => 'Invalid subject ID']);
                 exit;
             }
 
-            // Check if subject has teachers assigned
             $query = "SELECT COUNT(*) as count FROM teacher_subject_class WHERE subject_id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
@@ -98,21 +88,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Delete subject
             $query = "DELETE FROM subjects WHERE id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
 
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Subject deleted successfully']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to delete subject']);
-            }
+            echo json_encode([
+                'success' => $stmt->execute(),
+                'message' => $stmt->execute() ? 'Subject deleted successfully' : 'Failed to delete subject'
+            ]);
             exit;
 
         case 'get':
             $id = intval($_POST['id'] ?? 0);
-
             if ($id <= 0) {
                 echo json_encode(['success' => false, 'message' => 'Invalid subject ID']);
                 exit;
@@ -124,16 +111,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $stmt->execute();
             $subject = $stmt->get_result()->fetch_assoc();
 
-            if ($subject) {
-                echo json_encode(['success' => true, 'subject' => $subject]);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Subject not found']);
-            }
+            echo json_encode([
+                'success' => (bool)$subject,
+                'subject' => $subject,
+                'message' => $subject ? '' : 'Subject not found'
+            ]);
             exit;
     }
 }
 
-// Get all subjects with teacher counts
 $search = $_GET['search'] ?? '';
 
 $query = "SELECT s.*, 
@@ -151,7 +137,7 @@ if (!empty($search)) {
     $types .= "ss";
 }
 
-$query .= " ORDER BY s.created_at DESC";
+$query .= " ORDER BY s.id DESC";
 
 $stmt = $conn->prepare($query);
 if (!empty($params)) {
@@ -159,6 +145,7 @@ if (!empty($params)) {
 }
 $stmt->execute();
 $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -169,14 +156,15 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <title>Subject Management - EduLearn LMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
@@ -218,9 +206,9 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </aside>
 
-        <!-- Main Content -->
+
         <main class="main-content">
-            <!-- Header -->
+
             <header class="content-header">
                 <div class="header-left">
                     <h1>Subject Management</h1>
@@ -233,7 +221,7 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
             </header>
 
-            <!-- Filters -->
+
             <div class="filters-section" style="margin-bottom: 2rem;">
                 <form method="GET" class="filters-form" style="display: flex; gap: 1rem; align-items: center;">
                     <div class="filter-group">
@@ -250,59 +238,62 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </form>
             </div>
 
-            <!-- Subjects Table -->
+
             <div class="content-card">
                 <div class="card-header">
                     <h3>Subjects (<?php echo count($subjects); ?>)</h3>
                 </div>
                 <div class="card-content">
                     <?php if (empty($subjects)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No subjects found matching your criteria.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No subjects found matching your criteria.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Subject Name</th>
-                                        <th>Description</th>
-                                        <th>Teachers</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($subjects as $subject): ?>
-                                        <tr>
-                                            <td><?php echo $subject['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($subject['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($subject['description'] ?: 'No description'); ?></td>
-                                            <td><?php echo $subject['teacher_count']; ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($subject['created_at'])); ?></td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn-icon btn-edit" onclick="editSubject(<?php echo $subject['id']; ?>)" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn-icon btn-delete" onclick="deleteSubject(<?php echo $subject['id']; ?>)" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Subject Name</th>
+                                    <th>Description</th>
+                                    <th>Teachers</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($subjects as $subject): ?>
+                                <tr>
+                                    <td><?php echo $subject['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($subject['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($subject['description'] ?: 'No description'); ?>
+                                    </td>
+                                    <td><?php echo $subject['teacher_count']; ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($subject['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-edit"
+                                                onclick="editSubject(<?php echo $subject['id']; ?>)" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon btn-delete"
+                                                onclick="deleteSubject(<?php echo $subject['id']; ?>)" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Create/Edit Subject Modal -->
+
     <div id="subjectModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -320,7 +311,8 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
                 <div class="form-group">
                     <label for="subjectDescription">Description</label>
-                    <textarea id="subjectDescription" name="description" rows="3" placeholder="Optional subject description"></textarea>
+                    <textarea id="subjectDescription" name="description" rows="3"
+                        placeholder="Optional subject description"></textarea>
                 </div>
 
                 <div class="form-actions">
@@ -332,100 +324,60 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-        // Modal functions
-        function openCreateModal() {
-            document.getElementById('modalTitle').textContent = 'Add New Subject';
-            document.getElementById('formAction').value = 'create';
-            document.getElementById('submitBtn').textContent = 'Create Subject';
-            document.getElementById('subjectForm').reset();
-            document.getElementById('subjectModal').style.display = 'block';
-        }
+    function openCreateModal() {
+        document.getElementById('modalTitle').textContent = 'Add New Subject';
+        document.getElementById('formAction').value = 'create';
+        document.getElementById('submitBtn').textContent = 'Create Subject';
+        document.getElementById('subjectForm').reset();
+        document.getElementById('subjectModal').style.display = 'block';
+    }
 
-        function editSubject(subjectId) {
-            // Get subject data
+    function editSubject(subjectId) {
+
+        fetch('manage_subject.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'action=get&id=' + subjectId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('modalTitle').textContent = 'Edit Subject';
+                    document.getElementById('formAction').value = 'update';
+                    document.getElementById('submitBtn').textContent = 'Update Subject';
+
+                    document.getElementById('subjectId').value = data.subject.id;
+                    document.getElementById('subjectName').value = data.subject.name;
+                    document.getElementById('subjectDescription').value = data.subject.description || '';
+
+                    document.getElementById('subjectModal').style.display = 'block';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching subject data');
+            });
+    }
+
+    function deleteSubject(subjectId) {
+        if (confirm('Are you sure you want to delete this subject? This action cannot be undone.')) {
             fetch('manage_subject.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=get&id=' + subjectId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('modalTitle').textContent = 'Edit Subject';
-                        document.getElementById('formAction').value = 'update';
-                        document.getElementById('submitBtn').textContent = 'Update Subject';
-
-                        document.getElementById('subjectId').value = data.subject.id;
-                        document.getElementById('subjectName').value = data.subject.name;
-                        document.getElementById('subjectDescription').value = data.subject.description || '';
-
-                        document.getElementById('subjectModal').style.display = 'block';
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while fetching subject data');
-                });
-        }
-
-        function deleteSubject(subjectId) {
-            if (confirm('Are you sure you want to delete this subject? This action cannot be undone.')) {
-                fetch('manage_subject.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: 'action=delete&id=' + subjectId
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the subject');
-                    });
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('subjectModal').style.display = 'none';
-        }
-
-        // Form submission
-        document.getElementById('subjectForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-
-            submitBtn.textContent = 'Processing...';
-            submitBtn.disabled = true;
-
-            fetch('manage_subject.php', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
+                    body: 'action=delete&id=' + subjectId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert(data.message);
-                        closeModal();
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);
@@ -433,21 +385,59 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while processing the request');
-                })
-                .finally(() => {
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                    alert('An error occurred while deleting the subject');
                 });
-        });
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('subjectModal');
-            if (event.target === modal) {
-                closeModal();
-            }
         }
+    }
+
+    function closeModal() {
+        document.getElementById('subjectModal').style.display = 'none';
+    }
+
+
+    document.getElementById('subjectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.textContent = 'Processing...';
+        submitBtn.disabled = true;
+
+        fetch('manage_subject.php', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the request');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+    });
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('subjectModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
     </script>
 </body>
 

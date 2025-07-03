@@ -128,14 +128,15 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <title>Teacher Assignment - EduLearn LMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
@@ -177,9 +178,9 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </aside>
 
-        <!-- Main Content -->
+
         <main class="main-content">
-            <!-- Header -->
+
             <header class="content-header">
                 <div class="header-left">
                     <h1>Teacher Assignment</h1>
@@ -192,16 +193,17 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
             </header>
 
-            <!-- Filters -->
             <div class="filters-section" style="margin-bottom: 2rem;">
-                <form method="GET" class="filters-form" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <form method="GET" class="filters-form"
+                    style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                     <div class="filter-group">
                         <select name="teacher" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                             <option value="">All Teachers</option>
                             <?php foreach ($teachers as $teacher): ?>
-                                <option value="<?php echo $teacher['id']; ?>" <?php echo $teacher_filter == $teacher['id'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($teacher['name']); ?>
-                                </option>
+                            <option value="<?php echo $teacher['id']; ?>"
+                                <?php echo $teacher_filter == $teacher['id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($teacher['name']); ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -209,9 +211,10 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <select name="subject" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                             <option value="">All Subjects</option>
                             <?php foreach ($subjects as $subject): ?>
-                                <option value="<?php echo $subject['id']; ?>" <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($subject['name']); ?>
-                                </option>
+                            <option value="<?php echo $subject['id']; ?>"
+                                <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($subject['name']); ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -219,9 +222,10 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <select name="class" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                             <option value="">All Classes</option>
                             <?php foreach ($classes as $class): ?>
-                                <option value="<?php echo $class['id']; ?>" <?php echo $class_filter == $class['id'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($class['name']); ?>
-                                </option>
+                            <option value="<?php echo $class['id']; ?>"
+                                <?php echo $class_filter == $class['id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($class['name']); ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -234,56 +238,56 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </form>
             </div>
 
-            <!-- Assignments Table -->
             <div class="content-card">
                 <div class="card-header">
                     <h3>Teacher Assignments (<?php echo count($assignments); ?>)</h3>
                 </div>
                 <div class="card-content">
                     <?php if (empty($assignments)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No teacher assignments found matching your criteria.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No teacher assignments found matching your criteria.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Teacher</th>
-                                        <th>Email</th>
-                                        <th>Subject</th>
-                                        <th>Class</th>
-                                        <th>Assigned Date</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($assignments as $assignment): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($assignment['teacher_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['teacher_email']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['subject_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['class_name']); ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($assignment['created_at'])); ?></td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn-icon btn-delete" onclick="unassignTeacher(<?php echo $assignment['id']; ?>)" title="Unassign">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Teacher</th>
+                                    <th>Email</th>
+                                    <th>Subject</th>
+                                    <th>Class</th>
+                                    <th>Assigned Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($assignments as $assignment): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($assignment['teacher_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($assignment['teacher_email']); ?></td>
+                                    <td><?php echo htmlspecialchars($assignment['subject_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($assignment['class_name']); ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($assignment['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-delete"
+                                                onclick="unassignTeacher(<?php echo $assignment['id']; ?>)"
+                                                title="Unassign">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Assign Teacher Modal -->
     <div id="assignModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -298,9 +302,10 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <select id="teacherSelect" name="teacher_id" required>
                         <option value="">Select Teacher</option>
                         <?php foreach ($teachers as $teacher): ?>
-                            <option value="<?php echo $teacher['id']; ?>">
-                                <?php echo htmlspecialchars($teacher['name']); ?> (<?php echo htmlspecialchars($teacher['email']); ?>)
-                            </option>
+                        <option value="<?php echo $teacher['id']; ?>">
+                            <?php echo htmlspecialchars($teacher['name']); ?>
+                            (<?php echo htmlspecialchars($teacher['email']); ?>)
+                        </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -310,9 +315,9 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <select id="subjectSelect" name="subject_id" required>
                         <option value="">Select Subject</option>
                         <?php foreach ($subjects as $subject): ?>
-                            <option value="<?php echo $subject['id']; ?>">
-                                <?php echo htmlspecialchars($subject['name']); ?>
-                            </option>
+                        <option value="<?php echo $subject['id']; ?>">
+                            <?php echo htmlspecialchars($subject['name']); ?>
+                        </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -322,9 +327,9 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <select id="classSelect" name="class_id" required>
                         <option value="">Select Class</option>
                         <?php foreach ($classes as $class): ?>
-                            <option value="<?php echo $class['id']; ?>">
-                                <?php echo htmlspecialchars($class['name']); ?>
-                            </option>
+                        <option value="<?php echo $class['id']; ?>">
+                            <?php echo htmlspecialchars($class['name']); ?>
+                        </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -338,63 +343,25 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-        function openAssignModal() {
-            document.getElementById('assignForm').reset();
-            document.getElementById('assignModal').style.display = 'block';
-        }
+    function openAssignModal() {
+        document.getElementById('assignForm').reset();
+        document.getElementById('assignModal').style.display = 'block';
+    }
 
-        function unassignTeacher(assignmentId) {
-            if (confirm('Are you sure you want to unassign this teacher? This action cannot be undone.')) {
-                fetch('assign_teacher.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: 'action=unassign&id=' + assignmentId
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while unassigning the teacher');
-                    });
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('assignModal').style.display = 'none';
-        }
-
-        document.getElementById('assignForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-
-            submitBtn.textContent = 'Processing...';
-            submitBtn.disabled = true;
-
+    function unassignTeacher(assignmentId) {
+        if (confirm('Are you sure you want to unassign this teacher? This action cannot be undone.')) {
             fetch('assign_teacher.php', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: formData
+                    body: 'action=unassign&id=' + assignmentId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert(data.message);
-                        closeModal();
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);
@@ -402,20 +369,58 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while processing the request');
-                })
-                .finally(() => {
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                    alert('An error occurred while unassigning the teacher');
                 });
-        });
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('assignModal');
-            if (event.target === modal) {
-                closeModal();
-            }
         }
+    }
+
+    function closeModal() {
+        document.getElementById('assignModal').style.display = 'none';
+    }
+
+    document.getElementById('assignForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.textContent = 'Processing...';
+        submitBtn.disabled = true;
+
+        fetch('assign_teacher.php', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the request');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+    });
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('assignModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
     </script>
 </body>
 

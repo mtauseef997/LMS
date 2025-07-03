@@ -2,10 +2,11 @@
 require_once 'config/db.php';
 session_start();
 
+$start = microtime(true); // Start profiling
+
 $message = '';
 $messageType = '';
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name = trim($_POST['first_name'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -15,56 +16,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errors = [];
 
-    // Validation
+    // Server-side validation
     if (empty($first_name) || strlen($first_name) < 2) {
         $errors[] = 'Name must be at least 2 characters long';
     }
-
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Please enter a valid email address';
     }
-
     if (empty($password) || strlen($password) < 6) {
         $errors[] = 'Password must be at least 6 characters long';
     }
-
     if ($password !== $confirm_password) {
         $errors[] = 'Passwords do not match';
     }
-
     if (empty($role) || !in_array($role, ['student', 'teacher', 'admin'])) {
         $errors[] = 'Please select a valid role';
     }
 
-    // Check if email already exists
+    // Check if email already exists using COUNT()
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
 
-        if ($result->num_rows > 0) {
+        if ($count > 0) {
             $errors[] = 'Email address is already registered';
         }
-        $stmt->close();
     }
 
-    // If no errors, create user
+    // Insert if no errors
     if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $name = $first_name;
 
-        $stmt = $conn->prepare("INSERT INTO `users`(`name`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)");
-        if ($stmt === false) {
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+        if (!$stmt) {
             $errors[] = 'Prepare failed: ' . $conn->error;
         } else {
-            $stmt->bind_param("ssss", $name, $email, $hashed_password, $role);
+            $stmt->bind_param("ssss", $first_name, $email, $hashed_password, $role);
             if ($stmt->execute()) {
                 $message = 'Account created successfully! You can now log in.';
                 $messageType = 'success';
 
-                // AJAX response
-                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                     header('Content-Type: application/json');
                     echo json_encode(['success' => true, 'message' => $message]);
                     exit;
@@ -76,19 +73,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Error response (AJAX)
-    if (!empty($errors) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => implode(', ', $errors)]);
-        exit;
-    }
-
     if (!empty($errors)) {
         $message = implode('<br>', $errors);
         $messageType = 'error';
+
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => $message]);
+            exit;
+        }
     }
 }
+
+$executionTime = round(microtime(true) - $start, 3);
+error_log("register.php executed in {$executionTime} seconds");
 ?>
+
 
 <!-- HTML BELOW -->
 
@@ -99,103 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Register - Learning Management System</title>
     <link rel="stylesheet" href="assets/css/register.css">
-    <style>
-    body {
-        font-family: 'Inter', sans-serif;
-    }
 
-    .password-strength {
-        font-size: 0.875rem;
-        margin-top: 5px;
-        padding: 5px 10px;
-        border-radius: 6px;
-        text-align: center;
-        font-weight: 500;
-    }
-
-    .password-strength.very-weak {
-        background: #ffebee;
-        color: #c62828;
-    }
-
-    .password-strength.weak {
-        background: #fff3e0;
-        color: #ef6c00;
-    }
-
-    .password-strength.fair {
-        background: #fff8e1;
-        color: #f57f17;
-    }
-
-    .password-strength.good {
-        background: #f3e5f5;
-        color: #7b1fa2;
-    }
-
-    .password-strength.strong {
-        background: #e8f5e8;
-        color: #2e7d32;
-    }
-
-    .floating-shapes {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: -1;
-    }
-
-    .shape {
-        position: absolute;
-        opacity: 0.1;
-        animation: float 6s ease-in-out infinite;
-    }
-
-    .shape:nth-child(1) {
-        top: 20%;
-        left: 10%;
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        border-radius: 50%;
-        animation-delay: 0s;
-    }
-
-    .shape:nth-child(2) {
-        top: 60%;
-        right: 10%;
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(45deg, #f093fb, #f5576c);
-        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-        animation-delay: 2s;
-    }
-
-    .shape:nth-child(3) {
-        bottom: 20%;
-        left: 20%;
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(45deg, #4facfe, #00f2fe);
-        transform: rotate(45deg);
-        animation-delay: 4s;
-    }
-
-    @keyframes float {
-
-        0%,
-        100% {
-            transform: translateY(0px) rotate(0deg);
-        }
-
-        50% {
-            transform: translateY(-20px) rotate(180deg);
-        }
-    }
-    </style>
 </head>
 
 <body>
@@ -276,18 +181,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script src="assets/js/register.js"></script>
     <script>
-    // Show password strength hint
-    document.getElementById('password').addEventListener('input', function() {
-        const strengthIndicator = document.getElementById('passwordStrength');
-        if (this.value.length > 0) {
-            strengthIndicator.style.display = 'block';
-            // Optional: add JS password strength logic here
-        } else {
-            strengthIndicator.style.display = 'none';
-        }
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                submitButton.disabled = false;
+                const alertBox = document.querySelector('.alert');
+                if (alertBox) alertBox.remove();
+
+                const div = document.createElement('div');
+                div.className = 'alert alert-' + (data.success ? 'success' : 'error');
+                div.innerHTML = data.message;
+                form.parentNode.insertBefore(div, form);
+
+                if (data.success) form.reset();
+            })
+            .catch(err => {
+                submitButton.disabled = false;
+                alert("An error occurred: " + err.message);
+            });
     });
+    </script>
+
     </script>
 </body>
 

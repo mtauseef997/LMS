@@ -1,4 +1,4 @@
-/* Dashboard Styles */
+
 * {
     margin: 0;
     padding: 0;
@@ -17,7 +17,7 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styles */
+
 .sidebar {
     width: 280px;
     background: rgba(255, 255, 255, 0.95);
@@ -104,7 +104,6 @@ body {
     margin-right: 0.5rem;
 }
 
-/* Main Content */
 .main-content {
     flex: 1;
     margin-left: 280px;
@@ -148,7 +147,7 @@ body {
     color: #667eea;
 }
 
-/* Stats Grid */
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -196,7 +195,6 @@ body {
     font-size: 0.9rem;
 }
 
-/* Content Grid */
 .content-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -229,7 +227,7 @@ body {
     padding: 1.5rem 2rem;
 }
 
-/* Table Styles */
+
 .table-responsive {
     overflow-x: auto;
 }
@@ -256,7 +254,7 @@ body {
     color: #666;
 }
 
-/* Badges */
+
 .badge {
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
@@ -280,7 +278,6 @@ body {
     color: #007bff;
 }
 
-/* Buttons */
 .btn {
     padding: 0.5rem 1rem;
     border-radius: 8px;
@@ -301,7 +298,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* Quick Actions */
+
 .quick-actions {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -335,7 +332,6 @@ body {
     font-size: 0.9rem;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
         width: 100%;

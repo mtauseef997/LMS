@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Check if class has students or teachers assigned
+
             $query = "SELECT COUNT(*) as count FROM student_class WHERE class_id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
@@ -104,7 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Delete class
             $query = "DELETE FROM classes WHERE id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
@@ -139,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
     }
 }
 
-// Get all classes with student and teacher counts
 $search = $_GET['search'] ?? '';
 
 $query = "SELECT c.*, 
@@ -176,14 +174,15 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <title>Class Management - EduLearn LMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
@@ -225,9 +224,9 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </aside>
 
-        <!-- Main Content -->
+
         <main class="main-content">
-            <!-- Header -->
+
             <header class="content-header">
                 <div class="header-left">
                     <h1>Class Management</h1>
@@ -240,7 +239,7 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
             </header>
 
-            <!-- Filters -->
+
             <div class="filters-section" style="margin-bottom: 2rem;">
                 <form method="GET" class="filters-form" style="display: flex; gap: 1rem; align-items: center;">
                     <div class="filter-group">
@@ -257,61 +256,63 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </form>
             </div>
 
-            <!-- Classes Table -->
+
             <div class="content-card">
                 <div class="card-header">
                     <h3>Classes (<?php echo count($classes); ?>)</h3>
                 </div>
                 <div class="card-content">
                     <?php if (empty($classes)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No classes found matching your criteria.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No classes found matching your criteria.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Class Name</th>
-                                        <th>Description</th>
-                                        <th>Students</th>
-                                        <th>Teachers</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($classes as $class): ?>
-                                        <tr>
-                                            <td><?php echo $class['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($class['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($class['description'] ?: 'No description'); ?></td>
-                                            <td><?php echo $class['student_count']; ?></td>
-                                            <td><?php echo $class['teacher_count']; ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($class['created_at'])); ?></td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn-icon btn-edit" onclick="editClass(<?php echo $class['id']; ?>)" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn-icon btn-delete" onclick="deleteClass(<?php echo $class['id']; ?>)" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Class Name</th>
+                                    <th>Description</th>
+                                    <th>Students</th>
+                                    <th>Teachers</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($classes as $class): ?>
+                                <tr>
+                                    <td><?php echo $class['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($class['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($class['description'] ?: 'No description'); ?></td>
+                                    <td><?php echo $class['student_count']; ?></td>
+                                    <td><?php echo $class['teacher_count']; ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($class['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-edit"
+                                                onclick="editClass(<?php echo $class['id']; ?>)" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon btn-delete"
+                                                onclick="deleteClass(<?php echo $class['id']; ?>)" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Create/Edit Class Modal -->
+
     <div id="classModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -329,7 +330,8 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
                 <div class="form-group">
                     <label for="classDescription">Description</label>
-                    <textarea id="classDescription" name="description" rows="3" placeholder="Optional class description"></textarea>
+                    <textarea id="classDescription" name="description" rows="3"
+                        placeholder="Optional class description"></textarea>
                 </div>
 
                 <div class="form-actions">
@@ -341,100 +343,60 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-        // Modal functions
-        function openCreateModal() {
-            document.getElementById('modalTitle').textContent = 'Add New Class';
-            document.getElementById('formAction').value = 'create';
-            document.getElementById('submitBtn').textContent = 'Create Class';
-            document.getElementById('classForm').reset();
-            document.getElementById('classModal').style.display = 'block';
-        }
+    function openCreateModal() {
+        document.getElementById('modalTitle').textContent = 'Add New Class';
+        document.getElementById('formAction').value = 'create';
+        document.getElementById('submitBtn').textContent = 'Create Class';
+        document.getElementById('classForm').reset();
+        document.getElementById('classModal').style.display = 'block';
+    }
 
-        function editClass(classId) {
-            // Get class data
+    function editClass(classId) {
+
+        fetch('manage_class.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'action=get&id=' + classId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('modalTitle').textContent = 'Edit Class';
+                    document.getElementById('formAction').value = 'update';
+                    document.getElementById('submitBtn').textContent = 'Update Class';
+
+                    document.getElementById('classId').value = data.class.id;
+                    document.getElementById('className').value = data.class.name;
+                    document.getElementById('classDescription').value = data.class.description || '';
+
+                    document.getElementById('classModal').style.display = 'block';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching class data');
+            });
+    }
+
+    function deleteClass(classId) {
+        if (confirm('Are you sure you want to delete this class? This action cannot be undone.')) {
             fetch('manage_class.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=get&id=' + classId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('modalTitle').textContent = 'Edit Class';
-                        document.getElementById('formAction').value = 'update';
-                        document.getElementById('submitBtn').textContent = 'Update Class';
-
-                        document.getElementById('classId').value = data.class.id;
-                        document.getElementById('className').value = data.class.name;
-                        document.getElementById('classDescription').value = data.class.description || '';
-
-                        document.getElementById('classModal').style.display = 'block';
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while fetching class data');
-                });
-        }
-
-        function deleteClass(classId) {
-            if (confirm('Are you sure you want to delete this class? This action cannot be undone.')) {
-                fetch('manage_class.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: 'action=delete&id=' + classId
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the class');
-                    });
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('classModal').style.display = 'none';
-        }
-
-        // Form submission
-        document.getElementById('classForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-
-            submitBtn.textContent = 'Processing...';
-            submitBtn.disabled = true;
-
-            fetch('manage_class.php', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
+                    body: 'action=delete&id=' + classId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert(data.message);
-                        closeModal();
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);
@@ -442,21 +404,60 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while processing the request');
-                })
-                .finally(() => {
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                    alert('An error occurred while deleting the class');
                 });
-        });
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('classModal');
-            if (event.target === modal) {
-                closeModal();
-            }
         }
+    }
+
+    function closeModal() {
+        document.getElementById('classModal').style.display = 'none';
+    }
+
+
+    document.getElementById('classForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.textContent = 'Processing...';
+        submitBtn.disabled = true;
+
+        fetch('manage_class.php', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the request');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+    });
+
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('classModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
     </script>
 </body>
 

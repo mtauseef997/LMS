@@ -2,7 +2,7 @@
 session_start();
 require_once '../config/db.php';
 
-// Check if user is logged in and is student
+
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'student') {
     header('Location: ../login.php');
     exit;
@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'student') {
 
 $student_id = $_SESSION['user_id'];
 
-// Get student's enrolled classes
+
 $enrolled_classes = [];
 $query = "SELECT c.name as class_name, c.id as class_id
           FROM student_class sc
@@ -24,13 +24,13 @@ while ($row = $result->fetch_assoc()) {
     $enrolled_classes[] = $row;
 }
 
-// Get statistics
+
 $stats = [];
 
-// Total enrolled classes
+
 $stats['total_classes'] = count($enrolled_classes);
 
-// Total available quizzes
+
 $query = "SELECT COUNT(DISTINCT q.id) as count
           FROM quizzes q
           JOIN teacher_subject_class tsc ON q.teacher_id = tsc.teacher_id
@@ -42,7 +42,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stats['available_quizzes'] = $result->fetch_assoc()['count'];
 
-// Total completed quizzes
+
 $query = "SELECT COUNT(*) as count FROM quiz_submissions WHERE student_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $student_id);
@@ -50,7 +50,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stats['completed_quizzes'] = $result->fetch_assoc()['count'];
 
-// Total assignments
 $query = "SELECT COUNT(DISTINCT a.id) as count
           FROM assignments a
           JOIN teacher_subject_class tsc ON a.teacher_id = tsc.teacher_id
@@ -62,7 +61,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stats['total_assignments'] = $result->fetch_assoc()['count'];
 
-// Get recent quizzes
 $recent_quizzes = [];
 $query = "SELECT q.title, q.created_at,
           CASE WHEN qs.id IS NOT NULL THEN 'Completed' ELSE 'Available' END as status
@@ -89,14 +87,15 @@ while ($row = $result->fetch_assoc()) {
     <title>Student Dashboard - EduLearn LMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
@@ -134,9 +133,9 @@ while ($row = $result->fetch_assoc()) {
             </div>
         </aside>
 
-        <!-- Main Content -->
+
         <main class="main-content">
-            <!-- Header -->
+
             <header class="content-header">
                 <div class="header-left">
                     <h1>Student Dashboard</h1>
@@ -150,7 +149,7 @@ while ($row = $result->fetch_assoc()) {
                 </div>
             </header>
 
-            <!-- Stats Cards -->
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">
@@ -193,7 +192,7 @@ while ($row = $result->fetch_assoc()) {
                 </div>
             </div>
 
-            <!-- Content Grid -->
+
             <div class="content-grid" style="margin-top: 3rem;">
                 <div class="content-card">
                     <div class="card-header">
@@ -202,20 +201,23 @@ while ($row = $result->fetch_assoc()) {
                     </div>
                     <div class="card-content">
                         <?php if (empty($enrolled_classes)): ?>
-                            <p style="color: #666; text-align: center; padding: 2rem;">
-                                You are not enrolled in any classes yet. Contact admin for enrollment.
-                            </p>
+                        <p style="color: #666; text-align: center; padding: 2rem;">
+                            You are not enrolled in any classes yet. Contact admin for enrollment.
+                        </p>
                         <?php else: ?>
-                            <div class="class-list">
-                                <?php foreach ($enrolled_classes as $class): ?>
-                                    <div class="class-item" style="padding: 1rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; margin-bottom: 1rem;">
-                                        <h4 style="margin: 0 0 0.5rem 0; color: #333;"><?php echo htmlspecialchars($class['class_name']); ?></h4>
-                                        <a href="class_details.php?id=<?php echo $class['class_id']; ?>" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">
-                                            View Details
-                                        </a>
-                                    </div>
-                                <?php endforeach; ?>
+                        <div class="class-list">
+                            <?php foreach ($enrolled_classes as $class): ?>
+                            <div class="class-item"
+                                style="padding: 1rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; margin-bottom: 1rem;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #333;">
+                                    <?php echo htmlspecialchars($class['class_name']); ?></h4>
+                                <a href="class_details.php?id=<?php echo $class['class_id']; ?>" class="btn btn-primary"
+                                    style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">
+                                    View Details
+                                </a>
                             </div>
+                            <?php endforeach; ?>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -227,34 +229,35 @@ while ($row = $result->fetch_assoc()) {
                     </div>
                     <div class="card-content">
                         <?php if (empty($recent_quizzes)): ?>
-                            <p style="color: #666; text-align: center; padding: 2rem;">
-                                No quizzes available yet.
-                            </p>
+                        <p style="color: #666; text-align: center; padding: 2rem;">
+                            No quizzes available yet.
+                        </p>
                         <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Quiz Title</th>
-                                            <th>Status</th>
-                                            <th>Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($recent_quizzes as $quiz): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($quiz['title']); ?></td>
-                                                <td>
-                                                    <span class="badge badge-<?php echo $quiz['status'] === 'Completed' ? 'teacher' : 'student'; ?>">
-                                                        <?php echo $quiz['status']; ?>
-                                                    </span>
-                                                </td>
-                                                <td><?php echo date('M j, Y', strtotime($quiz['created_at'])); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz Title</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($recent_quizzes as $quiz): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($quiz['title']); ?></td>
+                                        <td>
+                                            <span
+                                                class="badge badge-<?php echo $quiz['status'] === 'Completed' ? 'teacher' : 'student'; ?>">
+                                                <?php echo $quiz['status']; ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo date('M j, Y', strtotime($quiz['created_at'])); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
