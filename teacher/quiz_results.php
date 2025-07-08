@@ -60,6 +60,7 @@ $stats = [
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,6 +77,7 @@ $stats = [
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -83,15 +85,18 @@ $stats = [
             border-radius: 12px;
             text-align: center;
         }
+
         .stat-number {
             font-size: 2rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
+
         .stat-label {
             font-size: 0.9rem;
             opacity: 0.9;
         }
+
         .grade-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -99,13 +104,34 @@ $stats = [
             font-weight: bold;
             font-size: 0.8rem;
         }
-        .grade-a { background: #dcfce7; color: #166534; }
-        .grade-b { background: #dbeafe; color: #1e40af; }
-        .grade-c { background: #fef3c7; color: #92400e; }
-        .grade-d { background: #fee2e2; color: #991b1b; }
-        .grade-f { background: #fecaca; color: #7f1d1d; }
+
+        .grade-a {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .grade-b {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .grade-c {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .grade-d {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .grade-f {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
     </style>
 </head>
+
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
@@ -113,7 +139,7 @@ $stats = [
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
                 <p>Teacher Panel</p>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <a href="dashboard.php" class="nav-item">
                     <i class="fas fa-tachometer-alt"></i>
@@ -132,7 +158,7 @@ $stats = [
                     <span>View Submissions</span>
                 </a>
             </nav>
-            
+
             <div class="sidebar-footer">
                 <a href="../logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
@@ -182,68 +208,69 @@ $stats = [
                 </div>
                 <div class="card-content">
                     <?php if (empty($submissions)): ?>
-                    <p style="text-align: center; color: #666; padding: 2rem;">
-                        No submissions yet for this quiz.
-                    </p>
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            No submissions yet for this quiz.
+                        </p>
                     <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Student</th>
-                                    <th>Email</th>
-                                    <th>Score</th>
-                                    <th>Percentage</th>
-                                    <th>Grade</th>
-                                    <th>Submitted</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($submissions as $submission): ?>
-                                <?php
-                                $percentage = $submission['percentage'];
-                                $letter_grade = '';
-                                $grade_class = '';
-                                if ($percentage >= 90) {
-                                    $letter_grade = 'A';
-                                    $grade_class = 'grade-a';
-                                } elseif ($percentage >= 80) {
-                                    $letter_grade = 'B';
-                                    $grade_class = 'grade-b';
-                                } elseif ($percentage >= 70) {
-                                    $letter_grade = 'C';
-                                    $grade_class = 'grade-c';
-                                } elseif ($percentage >= 60) {
-                                    $letter_grade = 'D';
-                                    $grade_class = 'grade-d';
-                                } else {
-                                    $letter_grade = 'F';
-                                    $grade_class = 'grade-f';
-                                }
-                                ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($submission['student_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($submission['student_email']); ?></td>
-                                    <td><?php echo $submission['score']; ?>/<?php echo $quiz['total_marks']; ?></td>
-                                    <td><?php echo number_format($percentage, 1); ?>%</td>
-                                    <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
-                                    <td><?php echo date('M j, Y g:i A', strtotime($submission['submitted_at'])); ?></td>
-                                    <td>
-                                        <a href="view_student_answers.php?quiz_id=<?php echo $quiz_id; ?>&student_id=<?php echo $submission['student_id']; ?>" 
-                                           class="btn-icon btn-primary" title="View Answers">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Email</th>
+                                        <th>Score</th>
+                                        <th>Percentage</th>
+                                        <th>Grade</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($submissions as $submission): ?>
+                                        <?php
+                                        $percentage = $submission['percentage'];
+                                        $letter_grade = '';
+                                        $grade_class = '';
+                                        if ($percentage >= 90) {
+                                            $letter_grade = 'A';
+                                            $grade_class = 'grade-a';
+                                        } elseif ($percentage >= 80) {
+                                            $letter_grade = 'B';
+                                            $grade_class = 'grade-b';
+                                        } elseif ($percentage >= 70) {
+                                            $letter_grade = 'C';
+                                            $grade_class = 'grade-c';
+                                        } elseif ($percentage >= 60) {
+                                            $letter_grade = 'D';
+                                            $grade_class = 'grade-d';
+                                        } else {
+                                            $letter_grade = 'F';
+                                            $grade_class = 'grade-f';
+                                        }
+                                        ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($submission['student_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($submission['student_email']); ?></td>
+                                            <td><?php echo $submission['score']; ?>/<?php echo $quiz['total_marks']; ?></td>
+                                            <td><?php echo number_format($percentage, 1); ?>%</td>
+                                            <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
+                                            <td><?php echo date('M j, Y g:i A', strtotime($submission['submitted_at'])); ?></td>
+                                            <td>
+                                                <a href="view_student_answers.php?quiz_id=<?php echo $quiz_id; ?>&student_id=<?php echo $submission['student_id']; ?>"
+                                                    class="btn-icon btn-primary" title="View Answers">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
         </main>
     </div>
 </body>
+
 </html>

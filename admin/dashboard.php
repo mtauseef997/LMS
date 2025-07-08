@@ -49,7 +49,7 @@ while ($row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
 
 <body>
@@ -99,8 +99,8 @@ while ($row = $result->fetch_assoc()) {
         <main class="main-content">
             <header class="content-header">
                 <div class="header-left">
-                    <h1>Dashboard</h1>
-                    <p>Welcome back, <?php echo htmlspecialchars($_SESSION['user_name']); ?>!</p>
+                    <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+                    <p>Welcome back, <strong><?php echo htmlspecialchars($_SESSION['user_name']); ?></strong>! 🎉</p>
                 </div>
                 <div class="header-right">
                     <div class="user-info">

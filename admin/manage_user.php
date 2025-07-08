@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: ../login.php');
     exit;
@@ -130,6 +129,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 echo json_encode(['success' => false, 'message' => 'User not found']);
             }
             exit;
+
+        case 'reset_password':
+            $id = intval($_POST['id'] ?? 0);
+            $new_password = $_POST['new_password'] ?? '';
+
+            if ($id <= 0) {
+                echo json_encode(['success' => false, 'message' => 'Invalid user ID']);
+                exit;
+            }
+
+            if (empty($new_password) || strlen($new_password) < 6) {
+                echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters long']);
+                exit;
+            }
+
+            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+            $query = "UPDATE users SET password = ? WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("si", $hashed_password, $id);
+
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'message' => 'Password reset successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to reset password']);
+            }
+            exit;
     }
 }
 
@@ -176,7 +201,7 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
 
 <body>
@@ -224,43 +249,49 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         <main class="main-content">
             <header class="content-header">
                 <div class="header-left">
-                    <h1>User Management</h1>
+                    <h1><i class="fas fa-users"></i> User Management</h1>
                     <p>Manage system users - admins, teachers, and students</p>
                 </div>
                 <div class="header-right">
-                    <a class="btn btn-primary" href="create_user.php">Add New User
-                    </a>
+                    <button class="btn btn-primary" onclick="openCreateModal()">
+                        <i class="fas fa-user-plus"></i> Add New User
+                    </button>
                 </div>
             </header>
-            <div class="filters-section" style="margin-bottom: 2rem;">
-                <form method="GET" class="filters-form" style="display: flex; gap: 1rem; align-items: center;">
+            <div class="filters-section">
+                <form method="GET" class="filters-form">
                     <div class="filter-group">
-                        <input type="text" name="search" placeholder="Search by name or email..."
-                            value="<?php echo htmlspecialchars($search); ?>"
-                            style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 0.25rem;">Search Users</label>
+                        <input type="text" name="search" placeholder="🔍 Search by name or email..."
+                            value="<?php echo htmlspecialchars($search); ?>" style="width: 280px;">
                     </div>
                     <div class="filter-group">
-                        <select name="role" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 0.25rem;">Filter by Role</label>
+                        <select name="role">
                             <option value="">All Roles</option>
-                            <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Admin
-                            </option>
-                            <option value="teacher" <?php echo $role_filter === 'teacher' ? 'selected' : ''; ?>>Teacher
-                            </option>
-                            <option value="student" <?php echo $role_filter === 'student' ? 'selected' : ''; ?>>Student
-                            </option>
+                            <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>👑 Admin</option>
+                            <option value="teacher" <?php echo $role_filter === 'teacher' ? 'selected' : ''; ?>>👨‍🏫 Teacher</option>
+                            <option value="student" <?php echo $role_filter === 'student' ? 'selected' : ''; ?>>👨‍🎓 Student</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-secondary">
-                        <i class="fas fa-search"></i> Filter
-                    </button>
-                    <a href="manage_user.php" class="btn btn-outline">
-                        <i class="fas fa-times"></i> Clear
-                    </a>
+                    <div class="filter-group" style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="manage_user.php" class="btn btn-outline">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    </div>
                 </form>
             </div>
             <div class="content-card">
                 <div class="card-header">
-                    <h3>Users (<?php echo count($users); ?>)</h3>
+                    <h3><i class="fas fa-list"></i> Users (<?php echo count($users); ?>)</h3>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span style="font-size: 0.9rem; color: #666;">
+                            <i class="fas fa-info-circle"></i> Total: <?php echo count($users); ?> users
+                        </span>
+                    </div>
                 </div>
                 <div class="card-content">
                     <?php if (empty($users)): ?>
@@ -298,6 +329,10 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                         onclick="editUser(<?php echo $user['id']; ?>)" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
+                                                    <button class="btn-icon btn-warning"
+                                                        onclick="resetPassword(<?php echo $user['id']; ?>)" title="Reset Password">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
                                                     <?php if ($user['id'] != $_SESSION['user_id']): ?>
                                                         <button class="btn-icon btn-delete"
                                                             onclick="deleteUser(<?php echo $user['id']; ?>)" title="Delete">
@@ -319,35 +354,35 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <div id="userModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Add New User</h3>
+                <h3 id="modalTitle"><i class="fas fa-user-plus"></i> Add New User</h3>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
-            <form id="userForm">
+            <form id="userForm" class="form">
                 <input type="hidden" id="userId" name="id">
                 <input type="hidden" id="formAction" name="action" value="create">
 
                 <div class="form-group">
-                    <label for="userName">Full Name *</label>
-                    <input type="text" id="userName" name="name" required>
+                    <label for="userName"><i class="fas fa-user"></i> Full Name *</label>
+                    <input type="text" id="userName" name="name" required placeholder="Enter full name">
                 </div>
 
                 <div class="form-group">
-                    <label for="userEmail">Email Address *</label>
-                    <input type="email" id="userEmail" name="email" required>
+                    <label for="userEmail"><i class="fas fa-envelope"></i> Email Address *</label>
+                    <input type="email" id="userEmail" name="email" required placeholder="Enter email address">
                 </div>
 
                 <div class="form-group" id="passwordGroup">
-                    <label for="userPassword">Password *</label>
-                    <input type="password" id="userPassword" name="password" required>
+                    <label for="userPassword"><i class="fas fa-lock"></i> Password *</label>
+                    <input type="password" id="userPassword" name="password" required placeholder="Enter password">
                 </div>
 
                 <div class="form-group">
-                    <label for="userRole">Role *</label>
+                    <label for="userRole"><i class="fas fa-user-tag"></i> Role *</label>
                     <select id="userRole" name="role" required>
                         <option value="">Select Role</option>
-                        <option value="admin">Admin</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="student">Student</option>
+                        <option value="admin">👑 Admin</option>
+                        <option value="teacher">👨‍🏫 Teacher</option>
+                        <option value="student">👨‍🎓 Student</option>
                     </select>
                 </div>
 
@@ -427,6 +462,36 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         console.error('Error:', error);
                         alert('An error occurred while deleting the user');
                     });
+            }
+        }
+
+        function resetPassword(userId) {
+            const newPassword = prompt('Enter new password (minimum 6 characters):');
+            if (newPassword && newPassword.length >= 6) {
+                if (confirm('Are you sure you want to reset this user\'s password?')) {
+                    fetch('manage_user.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: 'action=reset_password&id=' + userId + '&new_password=' + encodeURIComponent(newPassword)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                            } else {
+                                alert('Error: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while resetting the password');
+                        });
+                }
+            } else if (newPassword !== null) {
+                alert('Password must be at least 6 characters long');
             }
         }
 

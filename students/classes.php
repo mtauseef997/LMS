@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'student') {
 
 $student_id = $_SESSION['user_id'];
 
-// Get all classes the student is enrolled in
 $classes = [];
 $query = "SELECT c.id, c.name, 
           (SELECT COUNT(*) FROM subjects s 
@@ -27,30 +26,27 @@ while ($row = $result->fetch_assoc()) {
     $classes[] = $row;
 }
 
-// If a specific class is selected, get its details
 $selected_class = null;
 $class_subjects = [];
 $class_teachers = [];
 
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     $class_id = intval($_GET['id']);
-    
-    // Check if student is enrolled in this class
+
     $check_query = "SELECT COUNT(*) as count FROM student_class WHERE student_id = ? AND class_id = ?";
     $check_stmt = $conn->prepare($check_query);
     $check_stmt->bind_param("ii", $student_id, $class_id);
     $check_stmt->execute();
     $check_result = $check_stmt->get_result()->fetch_assoc();
-    
+
     if ($check_result['count'] > 0) {
-        // Get class details
+
         $class_query = "SELECT * FROM classes WHERE id = ?";
         $class_stmt = $conn->prepare($class_query);
         $class_stmt->bind_param("i", $class_id);
         $class_stmt->execute();
         $selected_class = $class_stmt->get_result()->fetch_assoc();
-        
-        // Get subjects for this class
+
         $subjects_query = "SELECT DISTINCT s.id, s.name, 
                           (SELECT COUNT(*) FROM quizzes q WHERE q.subject_id = s.id AND q.class_id = ?) as quiz_count,
                           (SELECT COUNT(*) FROM assignments a WHERE a.subject_id = s.id AND a.class_id = ?) as assignment_count
@@ -64,8 +60,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         while ($row = $subjects_result->fetch_assoc()) {
             $class_subjects[] = $row;
         }
-        
-        // Get teachers for this class
+
         $teachers_query = "SELECT DISTINCT u.id, u.name, s.name as subject_name
                           FROM users u
                           JOIN teacher_subject_class tsc ON u.id = tsc.teacher_id
@@ -85,16 +80,19 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Classes - EduLearn LMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
+
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
@@ -143,98 +141,99 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
             </header>
 
             <?php if (empty($classes)): ?>
-            <div class="alert alert-info">
-                <p>You are not enrolled in any classes yet. Please contact your administrator.</p>
-            </div>
-            <?php else: ?>
-                
-            <?php if ($selected_class): ?>
-            <!-- Class Details View -->
-            <div class="content-card">
-                <div class="card-header">
-                    <div class="header-left">
-                        <h3><?php echo htmlspecialchars($selected_class['name']); ?></h3>
-                    </div>
-                    <div class="header-right">
-                        <a href="classes.php" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Classes
-                        </a>
-                    </div>
+                <div class="alert alert-info">
+                    <p>You are not enrolled in any classes yet. Please contact your administrator.</p>
                 </div>
-                <div class="card-content">
-                    <div class="class-details">
-                        <div class="detail-section">
-                            <h4><i class="fas fa-book"></i> Subjects</h4>
-                            <?php if (empty($class_subjects)): ?>
-                            <p>No subjects assigned to this class yet.</p>
-                            <?php else: ?>
-                            <div class="subjects-grid">
-                                <?php foreach ($class_subjects as $subject): ?>
-                                <div class="subject-card">
-                                    <h5><?php echo htmlspecialchars($subject['name']); ?></h5>
-                                    <div class="subject-stats">
-                                        <div class="stat">
-                                            <i class="fas fa-question-circle"></i>
-                                            <span><?php echo $subject['quiz_count']; ?> Quizzes</span>
-                                        </div>
-                                        <div class="stat">
-                                            <i class="fas fa-tasks"></i>
-                                            <span><?php echo $subject['assignment_count']; ?> Assignments</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
-                            <?php endif; ?>
-                        </div>
+            <?php else: ?>
 
-                        <div class="detail-section">
-                            <h4><i class="fas fa-chalkboard-teacher"></i> Teachers</h4>
-                            <?php if (empty($class_teachers)): ?>
-                            <p>No teachers assigned to this class yet.</p>
-                            <?php else: ?>
-                            <div class="teachers-list">
-                                <?php foreach ($class_teachers as $teacher): ?>
-                                <div class="teacher-item">
-                                    <div class="teacher-avatar">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div class="teacher-info">
-                                        <h5><?php echo htmlspecialchars($teacher['name']); ?></h5>
-                                        <p><?php echo htmlspecialchars($teacher['subject_name']); ?></p>
-                                    </div>
+                <?php if ($selected_class): ?>
+
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div class="header-left">
+                                <h3><?php echo htmlspecialchars($selected_class['name']); ?></h3>
+                            </div>
+                            <div class="header-right">
+                                <a href="classes.php" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to Classes
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="class-details">
+                                <div class="detail-section">
+                                    <h4><i class="fas fa-book"></i> Subjects</h4>
+                                    <?php if (empty($class_subjects)): ?>
+                                        <p>No subjects assigned to this class yet.</p>
+                                    <?php else: ?>
+                                        <div class="subjects-grid">
+                                            <?php foreach ($class_subjects as $subject): ?>
+                                                <div class="subject-card">
+                                                    <h5><?php echo htmlspecialchars($subject['name']); ?></h5>
+                                                    <div class="subject-stats">
+                                                        <div class="stat">
+                                                            <i class="fas fa-question-circle"></i>
+                                                            <span><?php echo $subject['quiz_count']; ?> Quizzes</span>
+                                                        </div>
+                                                        <div class="stat">
+                                                            <i class="fas fa-tasks"></i>
+                                                            <span><?php echo $subject['assignment_count']; ?> Assignments</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
-                                <?php endforeach; ?>
+
+                                <div class="detail-section">
+                                    <h4><i class="fas fa-chalkboard-teacher"></i> Teachers</h4>
+                                    <?php if (empty($class_teachers)): ?>
+                                        <p>No teachers assigned to this class yet.</p>
+                                    <?php else: ?>
+                                        <div class="teachers-list">
+                                            <?php foreach ($class_teachers as $teacher): ?>
+                                                <div class="teacher-item">
+                                                    <div class="teacher-avatar">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div class="teacher-info">
+                                                        <h5><?php echo htmlspecialchars($teacher['name']); ?></h5>
+                                                        <p><?php echo htmlspecialchars($teacher['subject_name']); ?></p>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                            <?php endif; ?>
                         </div>
                     </div>
-                </div>
-            </div>
-            <?php else: ?>
-            <!-- Classes List View -->
-            <div class="classes-grid">
-                <?php foreach ($classes as $class): ?>
-                <div class="class-card">
-                    <div class="class-header">
-                        <h3><?php echo htmlspecialchars($class['name']); ?></h3>
-                    </div>
-                    <div class="class-content">
-                        <div class="class-stats">
-                            <div class="stat">
-                                <i class="fas fa-book"></i>
-                                <span><?php echo $class['subject_count']; ?> Subjects</span>
+                <?php else: ?>
+
+                    <div class="classes-grid">
+                        <?php foreach ($classes as $class): ?>
+                            <div class="class-card">
+                                <div class="class-header">
+                                    <h3><?php echo htmlspecialchars($class['name']); ?></h3>
+                                </div>
+                                <div class="class-content">
+                                    <div class="class-stats">
+                                        <div class="stat">
+                                            <i class="fas fa-book"></i>
+                                            <span><?php echo $class['subject_count']; ?> Subjects</span>
+                                        </div>
+                                    </div>
+                                    <a href="classes.php?id=<?php echo $class['id']; ?>" class="btn btn-primary">View Details</a>
+                                </div>
                             </div>
-                        </div>
-                        <a href="classes.php?id=<?php echo $class['id']; ?>" class="btn btn-primary">View Details</a>
+                        <?php endforeach; ?>
                     </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
-            
+                <?php endif; ?>
+
             <?php endif; ?>
         </main>
     </div>
 </body>
+
 </html>

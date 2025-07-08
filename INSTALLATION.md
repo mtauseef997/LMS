@@ -36,26 +36,35 @@
 ### 4. Set Directory Permissions
 
 Ensure the following directories are writable by the web server:
+
 ```bash
 chmod 755 assets/uploads/
 chmod 755 assets/uploads/assignments/
 ```
 
-### 5. Test the Installation
+### 5. Verify Database Schema
+
+1. Navigate to `your-domain.com/LMS/database/fix_all_columns.php`
+2. This will automatically add all missing columns to your database
+3. Alternatively, run `your-domain.com/LMS/database/check_schema.php` for detailed checking
+4. Follow any recommendations shown
+
+### 6. Test the Installation
 
 1. Navigate to `your-domain.com/LMS/test_system.php`
 2. Check that all tests pass (green checkmarks)
 3. Fix any issues shown in red
 
-### 6. Create Initial Users
+### 7. Create Initial Users
 
 1. Go to `your-domain.com/LMS/register.php`
 2. Register an admin user first
 3. Register some teacher and student accounts for testing
 
-### 7. Setup System Data
+### 8. Setup System Data
 
 As an admin user:
+
 1. Login and go to the admin dashboard
 2. Create some classes (e.g., "Grade 10A", "Grade 11B")
 3. Create some subjects (e.g., "Mathematics", "English", "Science")
@@ -95,29 +104,41 @@ LMS/
 ### Common Issues
 
 1. **Database Connection Failed**
+
    - Check database credentials in `config/db.php`
    - Ensure MySQL service is running
    - Verify database exists
 
-2. **File Upload Errors**
+2. **"Unknown column" Errors (created_at, percentage, total_marks, etc.)**
+
+   - Run `database/fix_all_columns.php` to automatically add all missing columns
+   - Or run `database/check_schema.php` for detailed checking
+   - Or manually run `database/update_schema.sql`
+   - This happens when database wasn't created with latest schema
+
+3. **File Upload Errors**
+
    - Check directory permissions for `assets/uploads/`
    - Verify PHP upload settings in `php.ini`
 
-3. **Session Issues**
+4. **Session Issues**
+
    - Ensure PHP sessions are enabled
    - Check session directory permissions
 
-4. **Redirect Loops**
+5. **Redirect Loops**
    - Clear browser cache and cookies
    - Check file permissions
 
 ### Testing the System
 
 1. **Admin Functions**:
+
    - Create users, classes, subjects
    - Assign teachers and enroll students
 
 2. **Teacher Functions**:
+
    - Create quizzes and assignments
    - Add questions and grade submissions
 
@@ -128,12 +149,14 @@ LMS/
 ## Security Considerations
 
 1. **Production Setup**:
+
    - Change default database credentials
    - Use HTTPS for all connections
    - Set proper file permissions
    - Remove `test_system.php` in production
 
 2. **File Uploads**:
+
    - Validate file types and sizes
    - Store uploads outside web root if possible
    - Scan uploaded files for malware
@@ -146,6 +169,7 @@ LMS/
 ## Support
 
 If you encounter issues:
+
 1. Check the `test_system.php` output
 2. Review web server error logs
 3. Verify all file permissions

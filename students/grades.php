@@ -47,13 +47,13 @@ $quiz_stmt->bind_param($types, ...$params);
 $quiz_stmt->execute();
 $quiz_grades = $quiz_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-$assignment_grades_query = "SELECT asub.*, a.title, a.max_marks, s.name as subject_name, c.name as class_name
+$assignment_grades_query = "SELECT asub.*, a.title, s.name as subject_name, c.name as class_name
                            FROM assignment_submissions asub
                            JOIN assignments a ON asub.assignment_id = a.id
                            JOIN subjects s ON a.subject_id = s.id
                            JOIN classes c ON a.class_id = c.id
                            JOIN student_class sc ON a.class_id = sc.class_id
-                           WHERE asub.student_id = ? AND sc.student_id = ? AND asub.score IS NOT NULL";
+                           WHERE asub.student_id = ? AND sc.student_id = ?";
 
 $assignment_params = [$student_id, $student_id];
 $assignment_types = "ii";
@@ -66,31 +66,51 @@ if (!empty($subject_filter)) {
 
 $assignment_grades_query .= " ORDER BY asub.submitted_at DESC";
 
-$assignment_stmt = $conn->prepare($assignment_grades_query);
-$assignment_stmt->bind_param($assignment_types, ...$assignment_params);
-$assignment_stmt->execute();
-$assignment_grades = $assignment_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+try {
+    $assignment_stmt = $conn->prepare($assignment_grades_query);
+    $assignment_stmt->bind_param($assignment_types, ...$assignment_params);
+    $assignment_stmt->execute();
+    $assignment_grades = $assignment_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+} catch (Exception $e) {
+    // If query fails, show empty assignment grades
+    $assignment_grades = [];
+    $error_message = "Database error: Some assignment grade data may not be available.";
+}
 
-$overall_stats_query = "SELECT 
+$overall_stats_query = "SELECT
     COUNT(DISTINCT qs.quiz_id) as total_quizzes,
     AVG(qs.percentage) as avg_quiz_percentage,
     COUNT(DISTINCT asub.assignment_id) as total_assignments,
-    AVG((asub.score / a.max_marks) * 100) as avg_assignment_percentage
+    COUNT(DISTINCT asub.assignment_id) as avg_assignment_score
     FROM student_class sc
     LEFT JOIN quizzes q ON sc.class_id = q.class_id
     LEFT JOIN quiz_submissions qs ON q.id = qs.quiz_id AND qs.student_id = ?
     LEFT JOIN assignments a ON sc.class_id = a.class_id
-    LEFT JOIN assignment_submissions asub ON a.id = asub.assignment_id AND asub.student_id = ? AND asub.score IS NOT NULL
+    LEFT JOIN assignment_submissions asub ON a.id = asub.assignment_id AND asub.student_id = ?
     WHERE sc.student_id = ?";
 
-$stats_stmt = $conn->prepare($overall_stats_query);
-$stats_stmt->bind_param("iii", $student_id, $student_id, $student_id);
-$stats_stmt->execute();
-$stats = $stats_stmt->get_result()->fetch_assoc();
+try {
+    $stats_stmt = $conn->prepare($overall_stats_query);
+    $stats_stmt->bind_param("iii", $student_id, $student_id, $student_id);
+    $stats_stmt->execute();
+    $stats = $stats_stmt->get_result()->fetch_assoc();
+} catch (Exception $e) {
+    // If query fails, provide default stats
+    $stats = [
+        'total_quizzes' => 0,
+        'avg_quiz_percentage' => 0,
+        'total_assignments' => 0,
+        'avg_assignment_score' => 0
+    ];
+    if (!isset($error_message)) {
+        $error_message = "Database error: Some statistics may not be available.";
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -107,6 +127,7 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -114,15 +135,18 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
             border-radius: 12px;
             text-align: center;
         }
+
         .stat-number {
             font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
+
         .stat-label {
             font-size: 0.9rem;
             opacity: 0.9;
         }
+
         .grade-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -130,13 +154,34 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
             font-weight: bold;
             font-size: 0.8rem;
         }
-        .grade-a { background: #dcfce7; color: #166534; }
-        .grade-b { background: #dbeafe; color: #1e40af; }
-        .grade-c { background: #fef3c7; color: #92400e; }
-        .grade-d { background: #fee2e2; color: #991b1b; }
-        .grade-f { background: #fecaca; color: #7f1d1d; }
+
+        .grade-a {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .grade-b {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .grade-c {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .grade-d {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .grade-f {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
     </style>
 </head>
+
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
@@ -184,6 +229,13 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
                 </div>
             </header>
 
+            <?php if (isset($error_message)): ?>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <?php echo $error_message; ?>
+                </div>
+            <?php endif; ?>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number"><?php echo $stats['total_quizzes'] ?? 0; ?></div>
@@ -198,8 +250,8 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
                     <div class="stat-label">Assignments Graded</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number"><?php echo number_format($stats['avg_assignment_percentage'] ?? 0, 1); ?>%</div>
-                    <div class="stat-label">Average Assignment Score</div>
+                    <div class="stat-number"><?php echo $stats['avg_assignment_score'] ?? 0; ?></div>
+                    <div class="stat-label">Assignment Submissions</div>
                 </div>
             </div>
 
@@ -210,17 +262,17 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
                         <select name="subject" id="subject" onchange="this.form.submit()">
                             <option value="">All Subjects</option>
                             <?php foreach ($subjects as $subject): ?>
-                            <option value="<?php echo $subject['id']; ?>" <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($subject['name']); ?>
-                            </option>
+                                <option value="<?php echo $subject['id']; ?>" <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($subject['name']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    
+
                     <?php if (!empty($subject_filter)): ?>
-                    <a href="grades.php" class="btn btn-outline">
-                        <i class="fas fa-times"></i> Clear Filter
-                    </a>
+                        <a href="grades.php" class="btn btn-outline">
+                            <i class="fas fa-times"></i> Clear Filter
+                        </a>
                     <?php endif; ?>
                 </form>
             </div>
@@ -231,59 +283,65 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
                 </div>
                 <div class="card-content">
                     <?php if (empty($quiz_grades)): ?>
-                    <p style="text-align: center; color: #666; padding: 2rem;">
-                        No quiz grades found.
-                    </p>
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            No quiz grades found.
+                        </p>
                     <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Quiz Title</th>
-                                    <th>Subject</th>
-                                    <th>Class</th>
-                                    <th>Score</th>
-                                    <th>Percentage</th>
-                                    <th>Grade</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($quiz_grades as $grade): ?>
-                                <?php
-                                $percentage = $grade['percentage'];
-                                $letter_grade = '';
-                                $grade_class = '';
-                                if ($percentage >= 90) {
-                                    $letter_grade = 'A';
-                                    $grade_class = 'grade-a';
-                                } elseif ($percentage >= 80) {
-                                    $letter_grade = 'B';
-                                    $grade_class = 'grade-b';
-                                } elseif ($percentage >= 70) {
-                                    $letter_grade = 'C';
-                                    $grade_class = 'grade-c';
-                                } elseif ($percentage >= 60) {
-                                    $letter_grade = 'D';
-                                    $grade_class = 'grade-d';
-                                } else {
-                                    $letter_grade = 'F';
-                                    $grade_class = 'grade-f';
-                                }
-                                ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($grade['title']); ?></td>
-                                    <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
-                                    <td><?php echo $grade['score']; ?>/<?php echo $grade['max_marks']; ?></td>
-                                    <td><?php echo number_format($percentage, 1); ?>%</td>
-                                    <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
-                                    <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz Title</th>
+                                        <th>Subject</th>
+                                        <th>Class</th>
+                                        <th>Score</th>
+                                        <th>Percentage</th>
+                                        <th>Grade</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($quiz_grades as $grade): ?>
+                                        <?php
+                                        $percentage = $grade['percentage'];
+                                        $letter_grade = '';
+                                        $grade_class = '';
+                                        if ($percentage >= 90) {
+                                            $letter_grade = 'A';
+                                            $grade_class = 'grade-a';
+                                        } elseif ($percentage >= 80) {
+                                            $letter_grade = 'B';
+                                            $grade_class = 'grade-b';
+                                        } elseif ($percentage >= 70) {
+                                            $letter_grade = 'C';
+                                            $grade_class = 'grade-c';
+                                        } elseif ($percentage >= 60) {
+                                            $letter_grade = 'D';
+                                            $grade_class = 'grade-d';
+                                        } else {
+                                            $letter_grade = 'F';
+                                            $grade_class = 'grade-f';
+                                        }
+                                        ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($grade['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
+                                            <td><?php
+                                                if (isset($grade['score']) && isset($grade['max_marks'])) {
+                                                    echo $grade['score'] . '/' . $grade['max_marks'];
+                                                } else {
+                                                    echo 'Not graded';
+                                                }
+                                                ?></td>
+                                            <td><?php echo number_format($percentage, 1); ?>%</td>
+                                            <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
+                                            <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -294,65 +352,77 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
                 </div>
                 <div class="card-content">
                     <?php if (empty($assignment_grades)): ?>
-                    <p style="text-align: center; color: #666; padding: 2rem;">
-                        No assignment grades found.
-                    </p>
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            No assignment grades found.
+                        </p>
                     <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Assignment Title</th>
-                                    <th>Subject</th>
-                                    <th>Class</th>
-                                    <th>Score</th>
-                                    <th>Percentage</th>
-                                    <th>Grade</th>
-                                    <th>Feedback</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($assignment_grades as $grade): ?>
-                                <?php
-                                $percentage = ($grade['score'] / $grade['max_marks']) * 100;
-                                $letter_grade = '';
-                                $grade_class = '';
-                                if ($percentage >= 90) {
-                                    $letter_grade = 'A';
-                                    $grade_class = 'grade-a';
-                                } elseif ($percentage >= 80) {
-                                    $letter_grade = 'B';
-                                    $grade_class = 'grade-b';
-                                } elseif ($percentage >= 70) {
-                                    $letter_grade = 'C';
-                                    $grade_class = 'grade-c';
-                                } elseif ($percentage >= 60) {
-                                    $letter_grade = 'D';
-                                    $grade_class = 'grade-d';
-                                } else {
-                                    $letter_grade = 'F';
-                                    $grade_class = 'grade-f';
-                                }
-                                ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($grade['title']); ?></td>
-                                    <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
-                                    <td><?php echo $grade['score']; ?>/<?php echo $grade['max_marks']; ?></td>
-                                    <td><?php echo number_format($percentage, 1); ?>%</td>
-                                    <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
-                                    <td><?php echo $grade['feedback'] ? htmlspecialchars($grade['feedback']) : '-'; ?></td>
-                                    <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Assignment Title</th>
+                                        <th>Subject</th>
+                                        <th>Class</th>
+                                        <th>Score</th>
+                                        <th>Percentage</th>
+                                        <th>Grade</th>
+                                        <th>Feedback</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($assignment_grades as $grade): ?>
+                                        <?php
+                                        // Handle missing score or max_marks columns
+                                        if (isset($grade['score']) && isset($grade['max_marks']) && $grade['max_marks'] > 0) {
+                                            $percentage = ($grade['score'] / $grade['max_marks']) * 100;
+                                        } else {
+                                            $percentage = 0;
+                                        }
+                                        $letter_grade = '';
+                                        $grade_class = '';
+                                        if ($percentage >= 90) {
+                                            $letter_grade = 'A';
+                                            $grade_class = 'grade-a';
+                                        } elseif ($percentage >= 80) {
+                                            $letter_grade = 'B';
+                                            $grade_class = 'grade-b';
+                                        } elseif ($percentage >= 70) {
+                                            $letter_grade = 'C';
+                                            $grade_class = 'grade-c';
+                                        } elseif ($percentage >= 60) {
+                                            $letter_grade = 'D';
+                                            $grade_class = 'grade-d';
+                                        } else {
+                                            $letter_grade = 'F';
+                                            $grade_class = 'grade-f';
+                                        }
+                                        ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($grade['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
+                                            <td><?php
+                                                if (isset($grade['score']) && isset($grade['max_marks'])) {
+                                                    echo $grade['score'] . '/' . $grade['max_marks'];
+                                                } else {
+                                                    echo 'Not graded';
+                                                }
+                                                ?></td>
+                                            <td><?php echo number_format($percentage, 1); ?>%</td>
+                                            <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
+                                            <td><?php echo $grade['feedback'] ? htmlspecialchars($grade['feedback']) : '-'; ?></td>
+                                            <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
         </main>
     </div>
 </body>
+
 </html>

@@ -34,6 +34,10 @@
             <i class="fas fa-user-graduate"></i>
             <span>Enroll Students</span>
         </a>
+        <a href="reports.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'active' : '' ?>">
+            <i class="fas fa-chart-bar"></i>
+            <span>Reports</span>
+        </a>
     </nav>
     <div class="sidebar-footer">
         <a href="../logout.php" class="logout-btn">

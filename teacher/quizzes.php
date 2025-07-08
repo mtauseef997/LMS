@@ -11,38 +11,37 @@ $teacher_id = $_SESSION['user_id'];
 
 
 try {
-    $assignments_query = "SELECT a.*, s.name as subject_name, c.name as class_name,
-                         COUNT(asub.id) as submission_count,
-                         COUNT(CASE WHEN asub.score IS NOT NULL THEN 1 END) as graded_count
-                         FROM assignments a
-                         JOIN subjects s ON a.subject_id = s.id
-                         JOIN classes c ON a.class_id = c.id
-                         LEFT JOIN assignment_submissions asub ON a.id = asub.assignment_id
-                         WHERE a.teacher_id = ?
-                         GROUP BY a.id
-                         ORDER BY a.created_at DESC";
-    $assignments_stmt = $conn->prepare($assignments_query);
-    $assignments_stmt->bind_param("i", $teacher_id);
-    $assignments_stmt->execute();
-    $assignments = $assignments_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $quizzes_query = "SELECT q.*, s.name as subject_name, c.name as class_name,
+                     COUNT(qs.id) as submission_count,
+                     COUNT(DISTINCT qs.student_id) as student_count
+                     FROM quizzes q
+                     JOIN subjects s ON q.subject_id = s.id
+                     JOIN classes c ON q.class_id = c.id
+                     LEFT JOIN quiz_submissions qs ON q.id = qs.quiz_id
+                     WHERE q.teacher_id = ?
+                     GROUP BY q.id
+                     ORDER BY q.created_at DESC";
+    $quizzes_stmt = $conn->prepare($quizzes_query);
+    $quizzes_stmt->bind_param("i", $teacher_id);
+    $quizzes_stmt->execute();
+    $quizzes = $quizzes_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 } catch (Exception $e) {
 
-    $assignments_query = "SELECT a.*, s.name as subject_name, c.name as class_name,
-                         COUNT(asub.id) as submission_count
-                         FROM assignments a
-                         JOIN subjects s ON a.subject_id = s.id
-                         JOIN classes c ON a.class_id = c.id
-                         LEFT JOIN assignment_submissions asub ON a.id = asub.assignment_id
-                         WHERE a.teacher_id = ?
-                         GROUP BY a.id
-                         ORDER BY a.created_at DESC";
-    $assignments_stmt = $conn->prepare($assignments_query);
-    $assignments_stmt->bind_param("i", $teacher_id);
-    $assignments_stmt->execute();
-    $assignments = $assignments_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $quizzes_query = "SELECT q.*, s.name as subject_name, c.name as class_name
+                     FROM quizzes q
+                     JOIN subjects s ON q.subject_id = s.id
+                     JOIN classes c ON q.class_id = c.id
+                     WHERE q.teacher_id = ?
+                     ORDER BY q.created_at DESC";
+    $quizzes_stmt = $conn->prepare($quizzes_query);
+    $quizzes_stmt->bind_param("i", $teacher_id);
+    $quizzes_stmt->execute();
+    $quizzes = $quizzes_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-    foreach ($assignments as &$assignment) {
-        $assignment['graded_count'] = 0;
+
+    foreach ($quizzes as &$quiz) {
+        $quiz['submission_count'] = 0;
+        $quiz['student_count'] = 0;
     }
 }
 ?>
@@ -53,10 +52,11 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Assignments - Teacher Panel</title>
+    <title>My Quizzes - Teacher Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
@@ -79,11 +79,11 @@ try {
                     <i class="fas fa-school"></i>
                     <span>My Classes</span>
                 </a>
-                <a href="quizzes.php" class="nav-item">
+                <a href="quizzes.php" class="nav-item active">
                     <i class="fas fa-question-circle"></i>
                     <span>Quizzes</span>
                 </a>
-                <a href="assignments.php" class="nav-item active">
+                <a href="assignments.php" class="nav-item">
                     <i class="fas fa-tasks"></i>
                     <span>Assignments</span>
                 </a>
@@ -105,73 +105,78 @@ try {
             </div>
         </aside>
 
-
         <main class="main-content">
             <header class="content-header">
                 <div class="header-left">
-                    <h1>My Assignments</h1>
-                    <p>Manage and track your assignments</p>
+                    <h1>My Quizzes</h1>
+                    <p>Manage and track your quizzes</p>
                 </div>
                 <div class="header-right">
-                    <a href="manage_assignment.php" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create New Assignment
+                    <a href="create_quiz.php" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Quiz
                     </a>
                 </div>
             </header>
 
             <div class="content-body">
-                <?php if (empty($assignments)): ?>
+                <?php if (empty($quizzes)): ?>
                     <div class="empty-state">
-                        <i class="fas fa-tasks"></i>
-                        <h3>No Assignments Yet</h3>
-                        <p>You haven't created any assignments yet. Create your first assignment to get started.</p>
-                        <a href="manage_assignment.php" class="btn btn-primary">Create Assignment</a>
+                        <i class="fas fa-question-circle"></i>
+                        <h3>No Quizzes Yet</h3>
+                        <p>You haven't created any quizzes yet. Create your first quiz to get started.</p>
+                        <a href="create_quiz.php" class="btn btn-primary">Create Quiz</a>
                     </div>
                 <?php else: ?>
                     <div class="grid grid-2">
-                        <?php foreach ($assignments as $assignment): ?>
+                        <?php foreach ($quizzes as $quiz): ?>
                             <div class="card">
                                 <div class="card-header">
-                                    <h3><?php echo htmlspecialchars($assignment['title']); ?></h3>
-                                    <div class="assignment-meta">
-                                        <span class="subject"><?php echo htmlspecialchars($assignment['subject_name']); ?></span>
-                                        <span class="class"><?php echo htmlspecialchars($assignment['class_name']); ?></span>
+                                    <h3><?php echo htmlspecialchars($quiz['title']); ?></h3>
+                                    <div class="quiz-meta">
+                                        <span class="subject"><?php echo htmlspecialchars($quiz['subject_name']); ?></span>
+                                        <span class="class"><?php echo htmlspecialchars($quiz['class_name']); ?></span>
                                     </div>
                                 </div>
 
                                 <div class="card-body">
-                                    <?php if (isset($assignment['description']) && $assignment['description']): ?>
-                                        <p class="description"><?php echo htmlspecialchars(substr($assignment['description'], 0, 100)) . (strlen($assignment['description']) > 100 ? '...' : ''); ?></p>
+                                    <?php if (isset($quiz['description']) && $quiz['description']): ?>
+                                        <p class="description">
+                                            <?php echo htmlspecialchars(substr($quiz['description'], 0, 100)) . (strlen($quiz['description']) > 100 ? '...' : ''); ?>
+                                        </p>
                                     <?php endif; ?>
 
-                                    <div class="assignment-stats">
-                                        <div class="stat">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>Due: <?php echo date('M j, Y', strtotime($assignment['due_date'])); ?></span>
-                                        </div>
-                                        <?php if (isset($assignment['max_marks'])): ?>
+                                    <div class="quiz-stats">
+                                        <?php if (isset($quiz['total_marks'])): ?>
                                             <div class="stat">
                                                 <i class="fas fa-star"></i>
-                                                <span>Max Marks: <?php echo $assignment['max_marks']; ?></span>
+                                                <span>Total Marks: <?php echo $quiz['total_marks']; ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (isset($quiz['time_limit'])): ?>
+                                            <div class="stat">
+                                                <i class="fas fa-clock"></i>
+                                                <span>Time: <?php echo $quiz['time_limit']; ?> minutes</span>
                                             </div>
                                         <?php endif; ?>
                                         <div class="stat">
                                             <i class="fas fa-users"></i>
-                                            <span><?php echo $assignment['submission_count']; ?> submissions</span>
+                                            <span><?php echo $quiz['submission_count']; ?> submissions</span>
                                         </div>
                                         <div class="stat">
-                                            <i class="fas fa-check-circle"></i>
-                                            <span><?php echo $assignment['graded_count']; ?> graded</span>
+                                            <i class="fas fa-calendar"></i>
+                                            <span>Created: <?php echo date('M j, Y', strtotime($quiz['created_at'])); ?></span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="card-footer">
-                                    <a href="assignment_submissions.php?assignment_id=<?php echo $assignment['id']; ?>" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i> View Submissions
+                                    <a href="quiz_questions.php?quiz_id=<?php echo $quiz['id']; ?>"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Edit Questions
                                     </a>
-                                    <a href="manage_assignment.php?edit=<?php echo $assignment['id']; ?>" class="btn btn-sm btn-secondary">
-                                        <i class="fas fa-edit"></i> Edit
+                                    <a href="quiz_results.php?quiz_id=<?php echo $quiz['id']; ?>"
+                                        class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-chart-bar"></i> View Results
                                     </a>
                                 </div>
                             </div>
@@ -183,13 +188,13 @@ try {
     </div>
 
     <style>
-        .assignment-meta {
+        .quiz-meta {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .assignment-meta span {
+        .quiz-meta span {
             background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             color: #6b7280;
             padding: 0.25rem 0.75rem;
@@ -198,7 +203,7 @@ try {
             font-weight: 500;
         }
 
-        .assignment-stats {
+        .quiz-stats {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;

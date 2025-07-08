@@ -78,11 +78,11 @@ $teacher_filter = $_GET['teacher'] ?? '';
 $subject_filter = $_GET['subject'] ?? '';
 $class_filter = $_GET['class'] ?? '';
 
-$query = "SELECT tsc.id, 
+$query = "SELECT tsc.id,
           u.name as teacher_name, u.email as teacher_email,
           s.name as subject_name,
           c.name as class_name,
-          tsc.created_at
+          tsc.id as assignment_id
           FROM teacher_subject_class tsc
           JOIN users u ON tsc.teacher_id = u.id
           JOIN subjects s ON tsc.subject_id = s.id
@@ -131,7 +131,7 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
 
 <body>
@@ -180,247 +180,710 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 
         <main class="main-content">
-
             <header class="content-header">
                 <div class="header-left">
-                    <h1>Teacher Assignment</h1>
-                    <p>Assign teachers to subjects and classes</p>
+                    <h1><i class="fas fa-chalkboard-teacher"></i> Teacher Assignment</h1>
+                    <p>Assign teachers to subjects and classes efficiently</p>
                 </div>
                 <div class="header-right">
                     <button class="btn btn-primary" onclick="openAssignModal()">
-                        <i class="fas fa-plus"></i> Assign Teacher
+                        <i class="fas fa-user-plus"></i> Assign Teacher
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportAssignments()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                    <button class="btn btn-info" onclick="showBulkAssignModal()">
+                        <i class="fas fa-users"></i> Bulk Assign
                     </button>
                 </div>
             </header>
 
-            <div class="filters-section" style="margin-bottom: 2rem;">
-                <form method="GET" class="filters-form"
-                    style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                    <div class="filter-group">
-                        <select name="teacher" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="">All Teachers</option>
-                            <?php foreach ($teachers as $teacher): ?>
-                            <option value="<?php echo $teacher['id']; ?>"
-                                <?php echo $teacher_filter == $teacher['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($teacher['name']); ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
+            <div class="content-body">
+                <!-- Enhanced Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><?php echo count($assignments); ?></h3>
+                            <p>Total Assignments</p>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <select name="subject" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="">All Subjects</option>
-                            <?php foreach ($subjects as $subject): ?>
-                            <option value="<?php echo $subject['id']; ?>"
-                                <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($subject['name']); ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><?php echo count($teachers); ?></h3>
+                            <p>Available Teachers</p>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <select name="class" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="">All Classes</option>
-                            <?php foreach ($classes as $class): ?>
-                            <option value="<?php echo $class['id']; ?>"
-                                <?php echo $class_filter == $class['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($class['name']); ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><?php echo count($subjects); ?></h3>
+                            <p>Subjects</p>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-secondary">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
-                    <a href="assign_teacher.php" class="btn btn-outline">
-                        <i class="fas fa-times"></i> Clear
-                    </a>
-                </form>
-            </div>
-
-            <div class="content-card">
-                <div class="card-header">
-                    <h3>Teacher Assignments (<?php echo count($assignments); ?>)</h3>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><?php echo count($classes); ?></h3>
+                            <p>Classes</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-content">
-                    <?php if (empty($assignments)): ?>
-                    <p style="text-align: center; color: #666; padding: 2rem;">
-                        No teacher assignments found matching your criteria.
-                    </p>
-                    <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Teacher</th>
-                                    <th>Email</th>
-                                    <th>Subject</th>
-                                    <th>Class</th>
-                                    <th>Assigned Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($assignments as $assignment): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($assignment['teacher_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($assignment['teacher_email']); ?></td>
-                                    <td><?php echo htmlspecialchars($assignment['subject_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($assignment['class_name']); ?></td>
-                                    <td><?php echo date('M j, Y', strtotime($assignment['created_at'])); ?></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-icon btn-delete"
-                                                onclick="unassignTeacher(<?php echo $assignment['id']; ?>)"
-                                                title="Unassign">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+
+                <!-- Enhanced Filters Section -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-filter"></i> Filter Assignments</h3>
+                        <p>Filter teacher assignments by teacher, subject, or class</p>
                     </div>
-                    <?php endif; ?>
+                    <div class="card-body">
+                        <form method="GET" class="enhanced-filters-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="teacher_filter">
+                                        <i class="fas fa-user"></i> Teacher
+                                    </label>
+                                    <div class="select-wrapper">
+                                        <select name="teacher" id="teacher_filter">
+                                            <option value="">All Teachers</option>
+                                            <?php foreach ($teachers as $teacher): ?>
+                                                <option value="<?php echo $teacher['id']; ?>"
+                                                    <?php echo $teacher_filter == $teacher['id'] ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($teacher['name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="subject_filter">
+                                        <i class="fas fa-book"></i> Subject
+                                    </label>
+                                    <div class="select-wrapper">
+                                        <select name="subject" id="subject_filter">
+                                            <option value="">All Subjects</option>
+                                            <?php foreach ($subjects as $subject): ?>
+                                                <option value="<?php echo $subject['id']; ?>"
+                                                    <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($subject['name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="class_filter">
+                                        <i class="fas fa-school"></i> Class
+                                    </label>
+                                    <div class="select-wrapper">
+                                        <select name="class" id="class_filter">
+                                            <option value="">All Classes</option>
+                                            <?php foreach ($classes as $class): ?>
+                                                <option value="<?php echo $class['id']; ?>"
+                                                    <?php echo $class_filter == $class['id'] ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($class['name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Apply Filters
+                                </button>
+                                <a href="assign_teacher.php" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Clear Filters
+                                </a>
+                                <button type="button" onclick="toggleAdvancedFilters()" class="btn btn-info">
+                                    <i class="fas fa-cog"></i> Advanced
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Enhanced Assignments Table -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list"></i> Teacher Assignments</h3>
+                        <p>Manage teacher assignments to subjects and classes (<?php echo count($assignments); ?> total)</p>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchAssignments" placeholder="Search assignments..." onkeyup="filterAssignments()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($assignments)): ?>
+                            <div class="empty-state">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                <h3>No Assignments Found</h3>
+                                <p>No teacher assignments found matching your criteria. Create your first assignment to get started.</p>
+                                <button onclick="openAssignModal()" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Create First Assignment
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <div class="table-container">
+                                <table class="data-table" id="assignmentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-user"></i> Teacher</th>
+                                            <th><i class="fas fa-envelope"></i> Email</th>
+                                            <th><i class="fas fa-book"></i> Subject</th>
+                                            <th><i class="fas fa-school"></i> Class</th>
+                                            <th><i class="fas fa-id-badge"></i> ID</th>
+                                            <th><i class="fas fa-cogs"></i> Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($assignments as $assignment): ?>
+                                            <tr class="assignment-row">
+                                                <td>
+                                                    <div class="teacher-info">
+                                                        <div class="teacher-avatar">
+                                                            <i class="fas fa-user"></i>
+                                                        </div>
+                                                        <span class="teacher-name"><?php echo htmlspecialchars($assignment['teacher_name']); ?></span>
+                                                    </div>
+                                                </td>
+                                                <td class="teacher-email"><?php echo htmlspecialchars($assignment['teacher_email']); ?></td>
+                                                <td>
+                                                    <span class="subject-badge"><?php echo htmlspecialchars($assignment['subject_name']); ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="class-badge"><?php echo htmlspecialchars($assignment['class_name']); ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="assignment-id">#<?php echo $assignment['assignment_id']; ?></span>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <button type="button" onclick="viewAssignmentDetails(<?php echo $assignment['assignment_id']; ?>)"
+                                                            class="btn btn-sm btn-info" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button type="button" onclick="unassignTeacher(<?php echo $assignment['id']; ?>)"
+                                                            class="btn btn-sm btn-danger" title="Unassign Teacher">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Enhanced Assignment Modal -->
     <div id="assignModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Assign Teacher</h3>
+                <h3><i class="fas fa-user-plus"></i> Assign Teacher</h3>
+                <p>Create a new teacher assignment to subject and class</p>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
-            <form id="assignForm">
-                <input type="hidden" name="action" value="assign">
+            <div class="modal-body">
+                <form id="assignForm" class="enhanced-form">
+                    <input type="hidden" name="action" value="assign">
 
-                <div class="form-group">
-                    <label for="teacherSelect">Teacher *</label>
-                    <select id="teacherSelect" name="teacher_id" required>
-                        <option value="">Select Teacher</option>
-                        <?php foreach ($teachers as $teacher): ?>
-                        <option value="<?php echo $teacher['id']; ?>">
-                            <?php echo htmlspecialchars($teacher['name']); ?>
-                            (<?php echo htmlspecialchars($teacher['email']); ?>)
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="teacherSelect">
+                                <i class="fas fa-user"></i> Select Teacher *
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="teacherSelect" name="teacher_id" required>
+                                    <option value="">-- Choose a teacher --</option>
+                                    <?php foreach ($teachers as $teacher): ?>
+                                        <option value="<?php echo $teacher['id']; ?>">
+                                            <?php echo htmlspecialchars($teacher['name']); ?>
+                                            (<?php echo htmlspecialchars($teacher['email']); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label for="subjectSelect">Subject *</label>
-                    <select id="subjectSelect" name="subject_id" required>
-                        <option value="">Select Subject</option>
-                        <?php foreach ($subjects as $subject): ?>
-                        <option value="<?php echo $subject['id']; ?>">
-                            <?php echo htmlspecialchars($subject['name']); ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label for="subjectSelect">
+                                <i class="fas fa-book"></i> Select Subject *
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="subjectSelect" name="subject_id" required>
+                                    <option value="">-- Choose a subject --</option>
+                                    <?php foreach ($subjects as $subject): ?>
+                                        <option value="<?php echo $subject['id']; ?>">
+                                            <?php echo htmlspecialchars($subject['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label for="classSelect">Class *</label>
-                    <select id="classSelect" name="class_id" required>
-                        <option value="">Select Class</option>
-                        <?php foreach ($classes as $class): ?>
-                        <option value="<?php echo $class['id']; ?>">
-                            <?php echo htmlspecialchars($class['name']); ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label for="classSelect">
+                                <i class="fas fa-school"></i> Select Class *
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="classSelect" name="class_id" required>
+                                    <option value="">-- Choose a class --</option>
+                                    <?php foreach ($classes as $class): ?>
+                                        <option value="<?php echo $class['id']; ?>">
+                                            <?php echo htmlspecialchars($class['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Assign Teacher</button>
-                </div>
-            </form>
+                    <div class="assignment-preview" id="assignmentPreview" style="display: none;">
+                        <h4><i class="fas fa-eye"></i> Assignment Preview</h4>
+                        <div class="preview-content">
+                            <div class="preview-item">
+                                <strong>Teacher:</strong> <span id="previewTeacher">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <strong>Subject:</strong> <span id="previewSubject">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <strong>Class:</strong> <span id="previewClass">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeModal()" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" id="submitBtn" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Assign Teacher
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <script>
-    function openAssignModal() {
-        document.getElementById('assignForm').reset();
-        document.getElementById('assignModal').style.display = 'block';
-    }
+    <!-- Enhanced CSS Styles -->
+    <style>
+        /* Enhanced Select Wrapper */
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
 
-    function unassignTeacher(assignmentId) {
-        if (confirm('Are you sure you want to unassign this teacher? This action cannot be undone.')) {
+        .select-wrapper select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 2.5rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            pointer-events: none;
+            font-size: 0.875rem;
+        }
+
+        /* Enhanced Teacher Info */
+        .teacher-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .teacher-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .teacher-name {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* Enhanced Badges */
+        .subject-badge,
+        .class-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .class-badge {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .assignment-id {
+            font-family: 'Courier New', monospace;
+            background: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* Enhanced Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Enhanced Table Styles */
+        .assignment-row:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .table-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Enhanced Header Actions */
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            width: 100%;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Enhanced Form Styles */
+        .enhanced-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .enhanced-filters-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group label i {
+            color: #667eea;
+        }
+
+        /* Assignment Preview */
+        .assignment-preview {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border: 1px solid #a5b4fc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .assignment-preview h4 {
+            margin: 0 0 1rem 0;
+            color: #3730a3;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-content {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .preview-item {
+            color: #374151;
+        }
+
+        .preview-item strong {
+            color: #1f2937;
+        }
+
+        /* Enhanced Card Header */
+        .card-header p {
+            margin: 0.5rem 0 0 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .teacher-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+
+    <!-- Enhanced JavaScript -->
+    <script>
+        // Enhanced modal functions
+        function openAssignModal() {
+            document.getElementById('assignForm').reset();
+            document.getElementById('assignmentPreview').style.display = 'none';
+            document.getElementById('assignModal').style.display = 'block';
+            document.getElementById('teacherSelect').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('assignModal').style.display = 'none';
+        }
+
+        // Enhanced unassign function
+        function unassignTeacher(assignmentId) {
+            if (confirm('Are you sure you want to unassign this teacher? This action cannot be undone.')) {
+                const button = event.target.closest('button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.disabled = true;
+
+                fetch('assign_teacher.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: 'action=unassign&id=' + assignmentId
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            location.reload();
+                        } else {
+                            showNotification('Error: ' + data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('An error occurred while unassigning the teacher', 'error');
+                    })
+                    .finally(() => {
+                        button.innerHTML = originalContent;
+                        button.disabled = false;
+                    });
+            }
+        }
+
+        // Filter assignments function
+        function filterAssignments() {
+            const searchTerm = document.getElementById('searchAssignments').value.toLowerCase();
+            const rows = document.querySelectorAll('.assignment-row');
+
+            rows.forEach(row => {
+                const teacherName = row.querySelector('.teacher-name').textContent.toLowerCase();
+                const teacherEmail = row.querySelector('.teacher-email').textContent.toLowerCase();
+                const subjectName = row.querySelector('.subject-badge').textContent.toLowerCase();
+                const className = row.querySelector('.class-badge').textContent.toLowerCase();
+
+                const matches = teacherName.includes(searchTerm) ||
+                    teacherEmail.includes(searchTerm) ||
+                    subjectName.includes(searchTerm) ||
+                    className.includes(searchTerm);
+
+                if (matches) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // View assignment details function
+        function viewAssignmentDetails(assignmentId) {
+            alert('Assignment details view coming soon!');
+        }
+
+        // Bulk assign modal function
+        function showBulkAssignModal() {
+            alert('Bulk assignment feature coming soon!');
+        }
+
+        // Export assignments function
+        function exportAssignments() {
+            alert('Export feature coming soon!');
+        }
+
+        // Toggle advanced filters function
+        function toggleAdvancedFilters() {
+            alert('Advanced filters coming soon!');
+        }
+
+        // Show notification function
+        function showNotification(message, type) {
+            // Simple notification - can be enhanced with a proper notification system
+            if (type === 'success') {
+                alert('✓ ' + message);
+            } else {
+                alert('✗ ' + message);
+            }
+        }
+
+        // Update assignment preview
+        function updateAssignmentPreview() {
+            const teacherSelect = document.getElementById('teacherSelect');
+            const subjectSelect = document.getElementById('subjectSelect');
+            const classSelect = document.getElementById('classSelect');
+            const preview = document.getElementById('assignmentPreview');
+
+            if (teacherSelect.value && subjectSelect.value && classSelect.value) {
+                document.getElementById('previewTeacher').textContent = teacherSelect.options[teacherSelect.selectedIndex].text;
+                document.getElementById('previewSubject').textContent = subjectSelect.options[subjectSelect.selectedIndex].text;
+                document.getElementById('previewClass').textContent = classSelect.options[classSelect.selectedIndex].text;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        // Enhanced form submission
+        document.getElementById('assignForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+
             fetch('assign_teacher.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=unassign&id=' + assignmentId
+                    body: formData
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        showNotification(data.message, 'success');
+                        closeModal();
                         location.reload();
                     } else {
-                        alert('Error: ' + data.message);
+                        showNotification('Error: ' + data.message, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while unassigning the teacher');
+                    showNotification('An error occurred while processing the request', 'error');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 });
+        });
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add change listeners for assignment preview
+            document.getElementById('teacherSelect').addEventListener('change', updateAssignmentPreview);
+            document.getElementById('subjectSelect').addEventListener('change', updateAssignmentPreview);
+            document.getElementById('classSelect').addEventListener('change', updateAssignmentPreview);
+        });
+
+        // Modal click outside to close
+        window.onclick = function(event) {
+            const modal = document.getElementById('assignModal');
+            if (event.target === modal) {
+                closeModal();
+            }
         }
-    }
-
-    function closeModal() {
-        document.getElementById('assignModal').style.display = 'none';
-    }
-
-    document.getElementById('assignForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        const submitBtn = document.getElementById('submitBtn');
-        const originalText = submitBtn.textContent;
-
-        submitBtn.textContent = 'Processing...';
-        submitBtn.disabled = true;
-
-        fetch('assign_teacher.php', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    closeModal();
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing the request');
-            })
-            .finally(() => {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            });
-    });
-
-    window.onclick = function(event) {
-        const modal = document.getElementById('assignModal');
-        if (event.target === modal) {
-            closeModal();
-        }
-    }
     </script>
 </body>
 

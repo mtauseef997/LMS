@@ -160,7 +160,7 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
 
 <body>
@@ -209,132 +209,505 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 
         <main class="main-content">
-
             <header class="content-header">
                 <div class="header-left">
-                    <h1>Subject Management</h1>
-                    <p>Create and manage subjects</p>
+                    <h1><i class="fas fa-book"></i> Subject Management</h1>
+                    <p>Create and manage academic subjects efficiently</p>
                 </div>
                 <div class="header-right">
                     <button class="btn btn-primary" onclick="openCreateModal()">
-                        <i class="fas fa-plus"></i> Add New Subject
+                        <i class="fas fa-book-open"></i> Add New Subject
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportSubjects()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                    <button class="btn btn-info" onclick="showBulkImportModal()">
+                        <i class="fas fa-upload"></i> Bulk Import
                     </button>
                 </div>
             </header>
 
-
-            <div class="filters-section" style="margin-bottom: 2rem;">
-                <form method="GET" class="filters-form" style="display: flex; gap: 1rem; align-items: center;">
-                    <div class="filter-group">
-                        <input type="text" name="search" placeholder="Search subjects..."
-                            value="<?php echo htmlspecialchars($search); ?>"
-                            style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
-                    </div>
-                    <button type="submit" class="btn btn-secondary">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                    <a href="manage_subject.php" class="btn btn-outline">
-                        <i class="fas fa-times"></i> Clear
-                    </a>
-                </form>
-            </div>
-
-
-            <div class="content-card">
-                <div class="card-header">
-                    <h3>Subjects (<?php echo count($subjects); ?>)</h3>
-                </div>
-                <div class="card-content">
-                    <?php if (empty($subjects)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No subjects found matching your criteria.
-                        </p>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Subject Name</th>
-                                        <th>Description</th>
-                                        <th>Teachers</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($subjects as $subject): ?>
-                                        <tr>
-                                            <td><?php echo $subject['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($subject['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($subject['description'] ?: 'No description'); ?>
-                                            </td>
-                                            <td><?php echo $subject['teacher_count']; ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($subject['created_at'])); ?></td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn-icon btn-edit"
-                                                        onclick="editSubject(<?php echo $subject['id']; ?>)" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn-icon btn-delete"
-                                                        onclick="deleteSubject(<?php echo $subject['id']; ?>)" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+            <div class="content-body">
+                <!-- Enhanced Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-book"></i>
                         </div>
-                    <?php endif; ?>
+                        <div class="stat-content">
+                            <h3><?php echo count($subjects); ?></h3>
+                            <p>Total Subjects</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><?php echo array_sum(array_column($subjects, 'teacher_count')); ?></h3>
+                            <p>Teacher Assignments</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><?php echo count(array_filter($subjects, function ($s) {
+                                    return !empty($s['description']);
+                                })); ?></h3>
+                            <p>With Descriptions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><?php echo count(array_filter($subjects, function ($s) {
+                                    return $s['teacher_count'] > 0;
+                                })); ?></h3>
+                            <p>Active Subjects</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Enhanced Search Section -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-search"></i> Search & Filter</h3>
+                        <p>Find subjects by name or description</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" class="enhanced-search-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="search_input">
+                                        <i class="fas fa-search"></i> Search Subjects
+                                    </label>
+                                    <div class="search-input-wrapper">
+                                        <input type="text" name="search" id="search_input"
+                                            placeholder="Search by name or description..."
+                                            value="<?php echo htmlspecialchars($search); ?>">
+                                        <i class="fas fa-search search-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <a href="manage_subject.php" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                                <button type="button" onclick="toggleAdvancedSearch()" class="btn btn-info">
+                                    <i class="fas fa-cog"></i> Advanced
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+                <!-- Enhanced Subjects Table -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list"></i> Subjects Management</h3>
+                        <p>Manage academic subjects and their assignments (<?php echo count($subjects); ?> total)</p>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchSubjects" placeholder="Quick search..." onkeyup="filterSubjects()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($subjects)): ?>
+                            <div class="empty-state">
+                                <i class="fas fa-book"></i>
+                                <h3>No Subjects Found</h3>
+                                <p>No subjects found matching your criteria. Create your first subject to get started.</p>
+                                <button onclick="openCreateModal()" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Create First Subject
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <div class="table-container">
+                                <table class="data-table" id="subjectsTable">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-hashtag"></i> ID</th>
+                                            <th><i class="fas fa-book"></i> Subject Name</th>
+                                            <th><i class="fas fa-info-circle"></i> Description</th>
+                                            <th><i class="fas fa-chalkboard-teacher"></i> Teachers</th>
+                                            <th><i class="fas fa-calendar"></i> Created</th>
+                                            <th><i class="fas fa-cogs"></i> Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($subjects as $subject): ?>
+                                            <tr class="subject-row">
+                                                <td>
+                                                    <span class="subject-id">#<?php echo $subject['id']; ?></span>
+                                                </td>
+                                                <td>
+                                                    <div class="subject-info">
+                                                        <div class="subject-icon">
+                                                            <i class="fas fa-book"></i>
+                                                        </div>
+                                                        <span class="subject-name"><?php echo htmlspecialchars($subject['name']); ?></span>
+                                                    </div>
+                                                </td>
+                                                <td class="subject-description">
+                                                    <?php if (!empty($subject['description'])): ?>
+                                                        <span class="description-text"><?php echo htmlspecialchars($subject['description']); ?></span>
+                                                    <?php else: ?>
+                                                        <span class="no-description">No description</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <span class="teacher-count-badge <?php echo $subject['teacher_count'] > 0 ? 'active' : 'inactive'; ?>">
+                                                        <?php echo $subject['teacher_count']; ?> teacher<?php echo $subject['teacher_count'] != 1 ? 's' : ''; ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="created-date"><?php echo date('M j, Y', strtotime($subject['created_at'])); ?></span>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <button type="button" onclick="viewSubjectDetails(<?php echo $subject['id']; ?>)"
+                                                            class="btn btn-sm btn-info" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button type="button" onclick="editSubject(<?php echo $subject['id']; ?>)"
+                                                            class="btn btn-sm btn-secondary" title="Edit Subject">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" onclick="deleteSubject(<?php echo $subject['id']; ?>)"
+                                                            class="btn btn-sm btn-danger" title="Delete Subject">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-
+    <!-- Enhanced Subject Modal -->
     <div id="subjectModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Add New Subject</h3>
+                <h3 id="modalTitle"><i class="fas fa-book-open"></i> Add New Subject</h3>
+                <p>Create a new academic subject for your institution</p>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
-            <form id="subjectForm">
-                <input type="hidden" id="subjectId" name="id">
-                <input type="hidden" id="formAction" name="action" value="create">
+            <div class="modal-body">
+                <form id="subjectForm" class="enhanced-form">
+                    <input type="hidden" id="subjectId" name="id">
+                    <input type="hidden" id="formAction" name="action" value="create">
 
-                <div class="form-group">
-                    <label for="subjectName">Subject Name *</label>
-                    <input type="text" id="subjectName" name="name" required>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="subjectName">
+                                <i class="fas fa-book"></i> Subject Name *
+                            </label>
+                            <input type="text" id="subjectName" name="name" required
+                                placeholder="Enter subject name (e.g., Mathematics, Physics)">
+                        </div>
 
-                <div class="form-group">
-                    <label for="subjectDescription">Description</label>
-                    <textarea id="subjectDescription" name="description" rows="3"
-                        placeholder="Optional subject description"></textarea>
-                </div>
+                        <div class="form-group">
+                            <label for="subjectDescription">
+                                <i class="fas fa-info-circle"></i> Description
+                            </label>
+                            <textarea id="subjectDescription" name="description" rows="4"
+                                placeholder="Optional subject description (e.g., Advanced mathematics covering algebra, calculus, and statistics)"></textarea>
+                        </div>
+                    </div>
 
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Create Subject</button>
-                </div>
-            </form>
+                    <div class="subject-preview" id="subjectPreview" style="display: none;">
+                        <h4><i class="fas fa-eye"></i> Subject Preview</h4>
+                        <div class="preview-content">
+                            <div class="preview-item">
+                                <strong>Name:</strong> <span id="previewName">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <strong>Description:</strong> <span id="previewDescription">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeModal()" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" id="submitBtn" class="btn btn-primary">
+                            <i class="fas fa-book-open"></i> Create Subject
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <script>
-        function openCreateModal() {
-            document.getElementById('modalTitle').textContent = 'Add New Subject';
-            document.getElementById('formAction').value = 'create';
-            document.getElementById('submitBtn').textContent = 'Create Subject';
-            document.getElementById('subjectForm').reset();
-            document.getElementById('subjectModal').style.display = 'block';
+    <!-- Enhanced CSS Styles -->
+    <style>
+        /* Enhanced Subject Info */
+        .subject-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        function editSubject(subjectId) {
+        .subject-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
 
+        .subject-name {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .subject-id {
+            font-family: 'Courier New', monospace;
+            background: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* Enhanced Description */
+        .description-text {
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        .no-description {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* Enhanced Teacher Count Badge */
+        .teacher-count-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .teacher-count-badge.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .teacher-count-badge.inactive {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #6b7280;
+        }
+
+        .created-date {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Enhanced Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Enhanced Table Styles */
+        .subject-row:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .table-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Enhanced Header Actions */
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            width: 100%;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Enhanced Search Form */
+        .enhanced-search-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input-wrapper input {
+            padding-left: 2.5rem;
+            width: 100%;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        /* Enhanced Form Styles */
+        .enhanced-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group label i {
+            color: #667eea;
+        }
+
+        /* Subject Preview */
+        .subject-preview {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border: 1px solid #a5b4fc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .subject-preview h4 {
+            margin: 0 0 1rem 0;
+            color: #3730a3;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-content {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .preview-item {
+            color: #374151;
+        }
+
+        .preview-item strong {
+            color: #1f2937;
+        }
+
+        /* Enhanced Card Header */
+        .card-header p {
+            margin: 0.5rem 0 0 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .subject-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+
+    <!-- Enhanced JavaScript -->
+    <script>
+        // Enhanced modal functions
+        function openCreateModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-book-open"></i> Add New Subject';
+            document.getElementById('formAction').value = 'create';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-book-open"></i> Create Subject';
+            document.getElementById('subjectForm').reset();
+            document.getElementById('subjectPreview').style.display = 'none';
+            document.getElementById('subjectModal').style.display = 'block';
+            document.getElementById('subjectName').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('subjectModal').style.display = 'none';
+        }
+
+        // Enhanced edit function
+        function editSubject(subjectId) {
             fetch('manage_subject.php', {
                     method: 'POST',
                     headers: {
@@ -346,27 +719,35 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('modalTitle').textContent = 'Edit Subject';
+                        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Subject';
                         document.getElementById('formAction').value = 'update';
-                        document.getElementById('submitBtn').textContent = 'Update Subject';
+                        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Subject';
 
                         document.getElementById('subjectId').value = data.subject.id;
                         document.getElementById('subjectName').value = data.subject.name;
                         document.getElementById('subjectDescription').value = data.subject.description || '';
 
+                        updateSubjectPreview();
                         document.getElementById('subjectModal').style.display = 'block';
+                        document.getElementById('subjectName').focus();
                     } else {
-                        alert('Error: ' + data.message);
+                        showNotification('Error: ' + data.message, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while fetching subject data');
+                    showNotification('An error occurred while fetching subject data', 'error');
                 });
         }
 
+        // Enhanced delete function
         function deleteSubject(subjectId) {
             if (confirm('Are you sure you want to delete this subject? This action cannot be undone.')) {
+                const button = event.target.closest('button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.disabled = true;
+
                 fetch('manage_subject.php', {
                         method: 'POST',
                         headers: {
@@ -378,32 +759,95 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert(data.message);
+                            showNotification(data.message, 'success');
                             location.reload();
                         } else {
-                            alert('Error: ' + data.message);
+                            showNotification('Error: ' + data.message, 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('An error occurred while deleting the subject');
+                        showNotification('An error occurred while deleting the subject', 'error');
+                    })
+                    .finally(() => {
+                        button.innerHTML = originalContent;
+                        button.disabled = false;
                     });
             }
         }
 
-        function closeModal() {
-            document.getElementById('subjectModal').style.display = 'none';
+        // Filter subjects function
+        function filterSubjects() {
+            const searchTerm = document.getElementById('searchSubjects').value.toLowerCase();
+            const rows = document.querySelectorAll('.subject-row');
+
+            rows.forEach(row => {
+                const subjectName = row.querySelector('.subject-name').textContent.toLowerCase();
+                const description = row.querySelector('.subject-description').textContent.toLowerCase();
+
+                const matches = subjectName.includes(searchTerm) || description.includes(searchTerm);
+
+                if (matches) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
+        // View subject details function
+        function viewSubjectDetails(subjectId) {
+            alert('Subject details view coming soon!');
+        }
 
+        // Export subjects function
+        function exportSubjects() {
+            alert('Export feature coming soon!');
+        }
+
+        // Bulk import modal function
+        function showBulkImportModal() {
+            alert('Bulk import feature coming soon!');
+        }
+
+        // Toggle advanced search function
+        function toggleAdvancedSearch() {
+            alert('Advanced search coming soon!');
+        }
+
+        // Show notification function
+        function showNotification(message, type) {
+            if (type === 'success') {
+                alert('✓ ' + message);
+            } else {
+                alert('✗ ' + message);
+            }
+        }
+
+        // Update subject preview
+        function updateSubjectPreview() {
+            const nameInput = document.getElementById('subjectName');
+            const descriptionInput = document.getElementById('subjectDescription');
+            const preview = document.getElementById('subjectPreview');
+
+            if (nameInput.value.trim()) {
+                document.getElementById('previewName').textContent = nameInput.value.trim();
+                document.getElementById('previewDescription').textContent = descriptionInput.value.trim() || 'No description';
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        // Enhanced form submission
         document.getElementById('subjectForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
             const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
+            const originalText = submitBtn.innerHTML;
 
-            submitBtn.textContent = 'Processing...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitBtn.disabled = true;
 
             fetch('manage_subject.php', {
@@ -416,23 +860,31 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        showNotification(data.message, 'success');
                         closeModal();
                         location.reload();
                     } else {
-                        alert('Error: ' + data.message);
+                        showNotification('Error: ' + data.message, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while processing the request');
+                    showNotification('An error occurred while processing the request', 'error');
                 })
                 .finally(() => {
-                    submitBtn.textContent = originalText;
+                    submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 });
         });
 
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add change listeners for subject preview
+            document.getElementById('subjectName').addEventListener('input', updateSubjectPreview);
+            document.getElementById('subjectDescription').addEventListener('input', updateSubjectPreview);
+        });
+
+        // Modal click outside to close
         window.onclick = function(event) {
             const modal = document.getElementById('subjectModal');
             if (event.target === modal) {

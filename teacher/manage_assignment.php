@@ -132,7 +132,8 @@ $teacher_assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <title>Manage Assignments - EduLearn LMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
@@ -186,7 +187,8 @@ $teacher_assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </header>
 
             <div class="filters-section" style="margin-bottom: 2rem;">
-                <form method="GET" class="filters-form" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <form method="GET" class="filters-form"
+                    style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                     <div class="filter-group">
                         <select name="subject" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                             <option value="">All Subjects</option>
@@ -266,14 +268,18 @@ $teacher_assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                 <?php endif; ?>
                                             </td>
                                             <td><?php echo $assignment['max_marks']; ?></td>
-                                            <td><?php echo $assignment['submission_count']; ?>/<?php echo $assignment['total_students']; ?></td>
+                                            <td><?php echo $assignment['submission_count']; ?>/<?php echo $assignment['total_students']; ?>
+                                            </td>
                                             <td><?php echo date('M j, Y', strtotime($assignment['created_at'])); ?></td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <a href="assignment_submissions.php?assignment_id=<?php echo $assignment['id']; ?>" class="btn-icon btn-primary" title="View Submissions">
+                                                    <a href="assignment_submissions.php?assignment_id=<?php echo $assignment['id']; ?>"
+                                                        class="btn-icon btn-primary" title="View Submissions">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <button class="btn-icon btn-delete" onclick="deleteAssignment(<?php echo $assignment['id']; ?>)" title="Delete">
+                                                    <button class="btn-icon btn-delete"
+                                                        onclick="deleteAssignment(<?php echo $assignment['id']; ?>)"
+                                                        title="Delete">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -305,7 +311,8 @@ $teacher_assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
                 <div class="form-group">
                     <label for="assignmentDescription">Description *</label>
-                    <textarea id="assignmentDescription" name="description" rows="4" required placeholder="Describe the assignment requirements..."></textarea>
+                    <textarea id="assignmentDescription" name="description" rows="4" required
+                        placeholder="Describe the assignment requirements..."></textarea>
                 </div>
 
                 <div class="form-row">
@@ -330,7 +337,8 @@ $teacher_assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <select id="classSelect" name="class_id" required>
                             <option value="">Select Class</option>
                             <?php foreach ($assignments as $assignment): ?>
-                                <option value="<?php echo $assignment['class_id']; ?>" data-subject="<?php echo $assignment['subject_id']; ?>">
+                                <option value="<?php echo $assignment['class_id']; ?>"
+                                    data-subject="<?php echo $assignment['subject_id']; ?>">
                                     <?php echo htmlspecialchars($assignment['class_name']); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -369,7 +377,9 @@ $teacher_assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
 
         function deleteAssignment(assignmentId) {
-            if (confirm('Are you sure you want to delete this assignment? This will also delete all submissions. This action cannot be undone.')) {
+            if (confirm(
+                    'Are you sure you want to delete this assignment? This will also delete all submissions. This action cannot be undone.'
+                )) {
                 fetch('manage_assignment.php', {
                         method: 'POST',
                         headers: {
@@ -406,7 +416,8 @@ $teacher_assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     option.style.display = 'block';
                 } else {
                     const optionSubject = option.getAttribute('data-subject');
-                    option.style.display = (selectedSubject === '' || optionSubject === selectedSubject) ? 'block' : 'none';
+                    option.style.display = (selectedSubject === '' || optionSubject === selectedSubject) ?
+                        'block' : 'none';
                 }
             });
         });

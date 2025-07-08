@@ -137,7 +137,7 @@ $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
@@ -171,9 +171,9 @@ $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </aside>
 
-        <!-- Main Content -->
+
         <main class="main-content">
-            <!-- Header -->
+
             <header class="content-header">
                 <div class="header-left">
                     <h1>Manage Quizzes</h1>
@@ -186,7 +186,7 @@ $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
             </header>
 
-            <!-- Filters -->
+
             <div class="filters-section" style="margin-bottom: 2rem;">
                 <form method="GET" class="filters-form" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                     <div class="filter-group">
@@ -226,7 +226,7 @@ $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </form>
             </div>
 
-            <!-- Quizzes Table -->
+
             <div class="content-card">
                 <div class="card-header">
                     <h3>Your Quizzes (<?php echo count($quizzes); ?>)</h3>
@@ -287,7 +287,7 @@ $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </main>
     </div>
 
-    <!-- Create Quiz Modal -->
+
     <div id="createModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
