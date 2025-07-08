@@ -11,7 +11,7 @@ if (isset($_SESSION['user_id'])) {
             header('Location: teacher/dashboard.php');
             exit;
         case 'student':
-            header('Location: student/dashboard.php');
+            header('Location: students/dashboard.php');
             exit;
     }
 }
@@ -50,12 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                 header('Content-Type: application/json');
-                $redirect_url = $user['role'] . '/dashboard.php';
+                $redirect_url = $user['role'] === 'student' ? 'students/dashboard.php' : $user['role'] . '/dashboard.php';
                 echo json_encode(['success' => true, 'message' => 'Login successful!', 'redirect' => $redirect_url]);
                 exit;
             }
 
-            header('Location: ' . $user['role'] . '/dashboard.php');
+            $redirect_path = $user['role'] === 'student' ? 'students/dashboard.php' : $user['role'] . '/dashboard.php';
+            header('Location: ' . $redirect_path);
             exit;
         } else {
             $errors[] = 'Invalid email or password';

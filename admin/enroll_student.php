@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($student_id <= 0 || $class_id <= 0) {
         $error = 'Please select both student and class.';
     } else {
-        $stmt = $conn->prepare("SELECT id FROM student_class_enrollment WHERE student_id = ? AND class_id = ?");
+        $stmt = $conn->prepare("SELECT id FROM student_class WHERE student_id = ? AND class_id = ?");
         $stmt->bind_param("ii", $student_id, $class_id);
         $stmt->execute();
         $stmt->store_result();
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Student is already enrolled in this class.';
         } else {
 
-            $stmt = $conn->prepare("INSERT INTO student_class_enrollment (student_id, class_id) VALUES (?, ?)");
+            $stmt = $conn->prepare("INSERT INTO student_class (student_id, class_id) VALUES (?, ?)");
             $stmt->bind_param("ii", $student_id, $class_id);
             if ($stmt->execute()) {
                 $success = 'Student enrolled successfully.';
@@ -88,10 +88,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="content-card">
                 <?php if ($error): ?>
-                <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+                    <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
                 <?php if ($success): ?>
-                <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+                    <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
                 <?php endif; ?>
 
                 <form method="POST" class="form">
@@ -100,9 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select name="student_id" required>
                             <option value="">-- Select --</option>
                             <?php foreach ($students as $student): ?>
-                            <option value="<?php echo $student['id']; ?>">
-                                <?php echo htmlspecialchars($student['name']); ?>
-                            </option>
+                                <option value="<?php echo $student['id']; ?>">
+                                    <?php echo htmlspecialchars($student['name']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -112,9 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select name="class_id" required>
                             <option value="">-- Select --</option>
                             <?php foreach ($classes as $class): ?>
-                            <option value="<?php echo $class['id']; ?>">
-                                <?php echo htmlspecialchars($class['name']); ?>
-                            </option>
+                                <option value="<?php echo $class['id']; ?>">
+                                    <?php echo htmlspecialchars($class['name']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>

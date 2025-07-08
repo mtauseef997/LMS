@@ -66,29 +66,25 @@ while ($row = $result->fetch_assoc()) {
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="users.php" class="nav-item">
+                <a href="manage_user.php" class="nav-item">
                     <i class="fas fa-users"></i>
-                    <span>Users</span>
+                    <span>Manage Users</span>
                 </a>
-                <a href="classes.php" class="nav-item">
+                <a href="manage_class.php" class="nav-item">
                     <i class="fas fa-school"></i>
-                    <span>Classes</span>
+                    <span>Manage Classes</span>
                 </a>
-                <a href="subjects.php" class="nav-item">
+                <a href="manage_subject.php" class="nav-item">
                     <i class="fas fa-book"></i>
-                    <span>Subjects</span>
+                    <span>Manage Subjects</span>
                 </a>
-                <a href="assignments.php" class="nav-item">
-                    <i class="fas fa-tasks"></i>
-                    <span>Assignments</span>
+                <a href="assign_teacher.php" class="nav-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Assign Teachers</span>
                 </a>
-                <a href="quizzes.php" class="nav-item">
-                    <i class="fas fa-question-circle"></i>
-                    <span>Quizzes</span>
-                </a>
-                <a href="reports.php" class="nav-item">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Reports</span>
+                <a href="enroll_student.php" class="nav-item">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Enroll Students</span>
                 </a>
             </nav>
 
@@ -208,16 +204,16 @@ while ($row = $result->fetch_assoc()) {
                                 </thead>
                                 <tbody>
                                     <?php foreach ($recent_users as $user): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($user['name']); ?></td>
-                                        <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                        <td>
-                                            <span class="badge badge-<?php echo $user['role']; ?>">
-                                                <?php echo ucfirst($user['role']); ?>
-                                            </span>
-                                        </td>
-                                        <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
-                                    </tr>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($user['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                            <td>
+                                                <span class="badge badge-<?php echo $user['role']; ?>">
+                                                    <?php echo ucfirst($user['role']); ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
+                                        </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>

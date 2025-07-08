@@ -9,34 +9,34 @@
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
-        <a href="users.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'users.php' ? 'active' : '' ?>">
+        <a href="manage_user.php"
+            class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'manage_user.php' ? 'active' : '' ?>">
             <i class="fas fa-users"></i>
-            <span>Users</span>
+            <span>Manage Users</span>
         </a>
-        <a href="classes.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'classes.php' ? 'active' : '' ?>">
+        <a href="manage_class.php"
+            class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'manage_class.php' ? 'active' : '' ?>">
             <i class="fas fa-school"></i>
-            <span>Classes</span>
+            <span>Manage Classes</span>
         </a>
-        <a href="subjects.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'subjects.php' ? 'active' : '' ?>">
+        <a href="manage_subject.php"
+            class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'manage_subject.php' ? 'active' : '' ?>">
             <i class="fas fa-book"></i>
-            <span>Subjects</span>
+            <span>Manage Subjects</span>
         </a>
-        <a href="assignments.php"
-            class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'assignments.php' ? 'active' : '' ?>">
-            <i class="fas fa-tasks"></i>
-            <span>Assignments</span>
+        <a href="assign_teacher.php"
+            class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'assign_teacher.php' ? 'active' : '' ?>">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <span>Assign Teachers</span>
         </a>
-        <a href="quizzes.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'quizzes.php' ? 'active' : '' ?>">
-            <i class="fas fa-question-circle"></i>
-            <span>Quizzes</span>
-        </a>
-        <a href="reports.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'active' : '' ?>">
-            <i class="fas fa-chart-bar"></i>
-            <span>Reports</span>
+        <a href="enroll_student.php"
+            class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'enroll_student.php' ? 'active' : '' ?>">
+            <i class="fas fa-user-graduate"></i>
+            <span>Enroll Students</span>
         </a>
     </nav>
     <div class="sidebar-footer">
-        <a href="../logout.php">
+        <a href="../logout.php" class="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
         </a>
