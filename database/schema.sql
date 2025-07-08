@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS classes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL, -- e.g., "Grade 6A"
+  description TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS classes (
 CREATE TABLE IF NOT EXISTS subjects (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL, -- e.g., "Math"
+  description TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -58,7 +60,7 @@ CREATE TABLE IF NOT EXISTS student_class (
   id INT AUTO_INCREMENT PRIMARY KEY,
   student_id INT NOT NULL,
   class_id INT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
   UNIQUE KEY unique_student_class (student_id, class_id)
@@ -89,14 +91,14 @@ CREATE TABLE IF NOT EXISTS quizzes (
 CREATE TABLE IF NOT EXISTS quiz_questions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   quiz_id INT NOT NULL,
-  question TEXT NOT NULL,
-  option_a VARCHAR(255),
-  option_b VARCHAR(255),
-  option_c VARCHAR(255),
-  option_d VARCHAR(255),
-  correct_option CHAR(1), -- 'A', 'B', 'C', 'D'
+  question_text TEXT NOT NULL,
+  question_type ENUM('multiple_choice', 'short_answer', 'essay') DEFAULT 'multiple_choice',
+  options JSON, -- For multiple choice questions
+  correct_answer TEXT NOT NULL,
+  explanation TEXT,
   marks INT DEFAULT 1,
   question_order INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
 
@@ -107,11 +109,11 @@ CREATE TABLE IF NOT EXISTS quiz_submissions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   quiz_id INT NOT NULL,
   student_id INT NOT NULL,
-  score INT DEFAULT 0, -- Total score achieved
-  total_marks INT DEFAULT 0, -- Total possible marks
+  score DECIMAL(5,2) DEFAULT 0, -- Total score achieved
   percentage DECIMAL(5,2) DEFAULT 0.00,
+  answers JSON, -- Student answers stored as JSON
   time_taken INT DEFAULT 0, -- in minutes
-  submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
   FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE KEY unique_quiz_student (quiz_id, student_id)
@@ -158,10 +160,10 @@ CREATE TABLE IF NOT EXISTS assignment_submissions (
   student_id INT NOT NULL,
   file_path VARCHAR(255), -- path to uploaded file
   submission_text TEXT, -- for text submissions
-  grade INT DEFAULT NULL, -- 0-100 or NULL if not graded
+  score DECIMAL(5,2) DEFAULT NULL, -- Score achieved or NULL if not graded
   feedback TEXT,
-  submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  graded_at DATETIME DEFAULT NULL,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  graded_at TIMESTAMP DEFAULT NULL,
   FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
   FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE KEY unique_assignment_student (assignment_id, student_id)
