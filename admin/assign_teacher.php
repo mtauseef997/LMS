@@ -132,6 +132,7 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
+    <link rel="stylesheet" href="../assets/css/responsive-modal.css">
 </head>
 
 <body>
@@ -711,17 +712,37 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </style>
 
     <!-- Enhanced JavaScript -->
+    <script src="../assets/js/responsive-modal.js"></script>
     <script>
+        // Initialize responsive modal
+        let assignModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            assignModal = new ResponsiveModal('assignModal');
+
+            // Add change listeners for assignment preview
+            document.getElementById('teacherSelect').addEventListener('change', updateAssignmentPreview);
+            document.getElementById('subjectSelect').addEventListener('change', updateAssignmentPreview);
+            document.getElementById('classSelect').addEventListener('change', updateAssignmentPreview);
+        });
+
         // Enhanced modal functions
         function openAssignModal() {
-            document.getElementById('assignForm').reset();
-            document.getElementById('assignmentPreview').style.display = 'none';
-            document.getElementById('assignModal').style.display = 'block';
-            document.getElementById('teacherSelect').focus();
+            const form = document.getElementById('assignForm');
+            if (form) form.reset();
+
+            const preview = document.getElementById('assignmentPreview');
+            if (preview) preview.style.display = 'none';
+
+            if (assignModal) {
+                assignModal.open();
+            }
         }
 
         function closeModal() {
-            document.getElementById('assignModal').style.display = 'none';
+            if (assignModal) {
+                assignModal.close();
+            }
         }
 
         // Enhanced unassign function
@@ -868,22 +889,6 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     submitBtn.disabled = false;
                 });
         });
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add change listeners for assignment preview
-            document.getElementById('teacherSelect').addEventListener('change', updateAssignmentPreview);
-            document.getElementById('subjectSelect').addEventListener('change', updateAssignmentPreview);
-            document.getElementById('classSelect').addEventListener('change', updateAssignmentPreview);
-        });
-
-        // Modal click outside to close
-        window.onclick = function(event) {
-            const modal = document.getElementById('assignModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
     </script>
 </body>
 

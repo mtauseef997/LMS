@@ -33,23 +33,23 @@ if (!$assignment) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
     header('Content-Type: application/json');
-    
+
     $action = $_POST['action'] ?? '';
-    
+
     if ($action === 'grade') {
         $submission_id = intval($_POST['submission_id'] ?? 0);
         $score = floatval($_POST['score'] ?? 0);
         $feedback = trim($_POST['feedback'] ?? '');
-        
+
         if ($submission_id <= 0 || $score < 0 || $score > $assignment['max_marks']) {
             echo json_encode(['success' => false, 'message' => 'Invalid submission ID or score']);
             exit;
         }
-        
+
         $update_query = "UPDATE assignment_submissions SET score = ?, feedback = ?, graded_at = NOW() WHERE id = ?";
         $update_stmt = $conn->prepare($update_query);
         $update_stmt->bind_param("dsi", $score, $feedback, $submission_id);
-        
+
         if ($update_stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Assignment graded successfully']);
         } else {
@@ -96,65 +96,75 @@ $stats = [
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assignment Submissions - <?php echo htmlspecialchars($assignment['title']); ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <style>
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .stat-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-        .submission-content {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 6px;
-            margin: 0.5rem 0;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        .grade-form {
-            display: inline-flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .grade-input {
-            width: 60px;
-            padding: 0.25rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .feedback-input {
-            width: 200px;
-            padding: 0.25rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .submission-content {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 0.5rem 0;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    .grade-form {
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .grade-input {
+        width: 60px;
+        padding: 0.25rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .feedback-input {
+        width: 200px;
+        padding: 0.25rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
     </style>
 </head>
+
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
@@ -162,7 +172,7 @@ $stats = [
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
                 <p>Teacher Panel</p>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <a href="dashboard.php" class="nav-item">
                     <i class="fas fa-tachometer-alt"></i>
@@ -181,7 +191,7 @@ $stats = [
                     <span>View Submissions</span>
                 </a>
             </nav>
-            
+
             <div class="sidebar-footer">
                 <a href="../logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
@@ -194,7 +204,9 @@ $stats = [
             <header class="content-header">
                 <div class="header-left">
                     <h1>Assignment Submissions</h1>
-                    <p><?php echo htmlspecialchars($assignment['title']); ?> - <?php echo htmlspecialchars($assignment['subject_name']); ?> (<?php echo htmlspecialchars($assignment['class_name']); ?>)</p>
+                    <p><?php echo htmlspecialchars($assignment['title']); ?> -
+                        <?php echo htmlspecialchars($assignment['subject_name']); ?>
+                        (<?php echo htmlspecialchars($assignment['class_name']); ?>)</p>
                 </div>
                 <div class="header-right">
                     <a href="manage_assignment.php" class="btn btn-secondary">
@@ -205,7 +217,8 @@ $stats = [
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number"><?php echo $stats['total_submissions']; ?>/<?php echo $stats['total_students']; ?></div>
+                    <div class="stat-number">
+                        <?php echo $stats['total_submissions']; ?>/<?php echo $stats['total_students']; ?></div>
                     <div class="stat-label">Submissions</div>
                 </div>
                 <div class="stat-card">
@@ -234,24 +247,29 @@ $stats = [
                     <?php else: ?>
                     <div class="submissions-list">
                         <?php foreach ($submissions as $submission): ?>
-                        <div class="submission-item" style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid <?php echo $submission['score'] !== null ? '#10b981' : '#f59e0b'; ?>;">
-                            <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
+                        <div class="submission-item"
+                            style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid <?php echo $submission['score'] !== null ? '#10b981' : '#f59e0b'; ?>;">
+                            <div
+                                style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
                                 <div style="flex: 1;">
-                                    <h4 style="margin: 0 0 0.5rem 0;"><?php echo htmlspecialchars($submission['student_name']); ?></h4>
+                                    <h4 style="margin: 0 0 0.5rem 0;">
+                                        <?php echo htmlspecialchars($submission['student_name']); ?></h4>
                                     <p style="margin: 0; color: #666; font-size: 0.9rem;">
-                                        <?php echo htmlspecialchars($submission['student_email']); ?> • 
-                                        Submitted: <?php echo date('M j, Y g:i A', strtotime($submission['submitted_at'])); ?>
+                                        <?php echo htmlspecialchars($submission['student_email']); ?> •
+                                        Submitted:
+                                        <?php echo date('M j, Y g:i A', strtotime($submission['submitted_at'])); ?>
                                     </p>
                                 </div>
                                 <div>
                                     <?php if ($submission['score'] !== null): ?>
-                                    <span class="badge badge-success">Graded: <?php echo $submission['score']; ?>/<?php echo $assignment['max_marks']; ?></span>
+                                    <span class="badge badge-success">Graded:
+                                        <?php echo $submission['score']; ?>/<?php echo $assignment['max_marks']; ?></span>
                                     <?php else: ?>
                                     <span class="badge badge-warning">Pending Grade</span>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                            
+
                             <?php if (!empty($submission['submission_text'])): ?>
                             <div style="margin-bottom: 1rem;">
                                 <strong>Text Submission:</strong>
@@ -260,27 +278,30 @@ $stats = [
                                 </div>
                             </div>
                             <?php endif; ?>
-                            
+
                             <?php if (!empty($submission['file_path']) && file_exists($submission['file_path'])): ?>
                             <div style="margin-bottom: 1rem;">
                                 <strong>File Submission:</strong>
-                                <a href="<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank" class="btn btn-sm btn-outline">
+                                <a href="<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank"
+                                    class="btn btn-sm btn-outline">
                                     <i class="fas fa-download"></i> Download File
                                 </a>
                             </div>
                             <?php endif; ?>
-                            
+
                             <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
-                                <form class="grade-form" onsubmit="gradeSubmission(event, <?php echo $submission['id']; ?>)">
+                                <form class="grade-form"
+                                    onsubmit="gradeSubmission(event, <?php echo $submission['id']; ?>)">
                                     <label>Score:</label>
-                                    <input type="number" class="grade-input" min="0" max="<?php echo $assignment['max_marks']; ?>" 
-                                           step="0.1" value="<?php echo $submission['score'] ?? ''; ?>" required>
+                                    <input type="number" class="grade-input" min="0"
+                                        max="<?php echo $assignment['max_marks']; ?>" step="0.1"
+                                        value="<?php echo $submission['score'] ?? ''; ?>" required>
                                     <span>/<?php echo $assignment['max_marks']; ?></span>
-                                    
+
                                     <label style="margin-left: 1rem;">Feedback:</label>
-                                    <input type="text" class="feedback-input" placeholder="Optional feedback..." 
-                                           value="<?php echo htmlspecialchars($submission['feedback'] ?? ''); ?>">
-                                    
+                                    <input type="text" class="feedback-input" placeholder="Optional feedback..."
+                                        value="<?php echo htmlspecialchars($submission['feedback'] ?? ''); ?>">
+
                                     <button type="submit" class="btn btn-sm btn-primary">
                                         <?php echo $submission['score'] !== null ? 'Update' : 'Grade'; ?>
                                     </button>
@@ -296,25 +317,25 @@ $stats = [
     </div>
 
     <script>
-        function gradeSubmission(event, submissionId) {
-            event.preventDefault();
-            
-            const form = event.target;
-            const score = form.querySelector('.grade-input').value;
-            const feedback = form.querySelector('.feedback-input').value;
-            const button = form.querySelector('button');
-            const originalText = button.textContent;
-            
-            button.textContent = 'Grading...';
-            button.disabled = true;
-            
-            const formData = new FormData();
-            formData.append('action', 'grade');
-            formData.append('submission_id', submissionId);
-            formData.append('score', score);
-            formData.append('feedback', feedback);
-            
-            fetch('assignment_submissions.php?assignment_id=<?php echo $assignment_id; ?>', {
+    function gradeSubmission(event, submissionId) {
+        event.preventDefault();
+
+        const form = event.target;
+        const score = form.querySelector('.grade-input').value;
+        const feedback = form.querySelector('.feedback-input').value;
+        const button = form.querySelector('button');
+        const originalText = button.textContent;
+
+        button.textContent = 'Grading...';
+        button.disabled = true;
+
+        const formData = new FormData();
+        formData.append('action', 'grade');
+        formData.append('submission_id', submissionId);
+        formData.append('score', score);
+        formData.append('feedback', feedback);
+
+        fetch('assignment_submissions.php?assignment_id=<?php echo $assignment_id; ?>', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -338,7 +359,8 @@ $stats = [
                 button.textContent = originalText;
                 button.disabled = false;
             });
-        }
+    }
     </script>
 </body>
+
 </html>

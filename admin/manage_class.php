@@ -193,6 +193,7 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
+    <link rel="stylesheet" href="../assets/css/responsive-modal.css">
 </head>
 
 <body>
@@ -362,13 +363,161 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
+    <!-- Enhanced Modal Padding Styles -->
+    <style>
+        /* Enhanced Modal Padding */
+        .modal-content {
+            padding: 0 !important;
+        }
+
+        .modal-header {
+            padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+        }
+
+        .modal-body {
+            padding: 0 2.5rem 2.5rem 2.5rem !important;
+        }
+
+        .form-group {
+            margin-bottom: 2rem !important;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .form-actions {
+            margin-top: 2.5rem !important;
+            padding-top: 2rem !important;
+            border-top: 2px solid #e5e7eb !important;
+        }
+
+        /* Enhanced form styling */
+        .form-group label {
+            margin-bottom: 0.75rem !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            color: #374151 !important;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            border-radius: 10px !important;
+            border: 2px solid #e5e7eb !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+            outline: none !important;
+        }
+
+        .form-group textarea {
+            resize: vertical !important;
+            min-height: 120px !important;
+        }
+
+        /* Enhanced button styling */
+        .form-actions .btn {
+            padding: 1rem 2rem !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
+            min-width: 140px !important;
+        }
+
+        /* Responsive padding adjustments */
+        @media (max-width: 768px) {
+            .modal-header {
+                padding: 1.5rem 2rem 1rem 2rem !important;
+            }
+
+            .modal-body {
+                padding: 0 2rem 2rem 2rem !important;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem !important;
+            }
+
+            .form-actions {
+                margin-top: 2rem !important;
+                padding-top: 1.5rem !important;
+            }
+
+            .form-actions .btn {
+                padding: 0.875rem 1.5rem !important;
+                min-width: 120px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-header {
+                padding: 1rem 1.5rem 0.75rem 1.5rem !important;
+            }
+
+            .modal-body {
+                padding: 0 1.5rem 1.5rem 1.5rem !important;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem !important;
+            }
+
+            .form-actions {
+                margin-top: 1.5rem !important;
+                padding-top: 1.25rem !important;
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+
+            .form-actions .btn {
+                width: 100% !important;
+                padding: 1rem !important;
+                min-width: auto !important;
+            }
+        }
+    </style>
+
+    <script src="../assets/js/responsive-modal.js"></script>
     <script>
+        // Initialize responsive modal
+        let classModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            classModal = new ResponsiveModal('classModal');
+        });
+
         function openCreateModal() {
-            document.getElementById('modalTitle').textContent = 'Add New Class';
-            document.getElementById('formAction').value = 'create';
-            document.getElementById('submitBtn').textContent = 'Create Class';
-            document.getElementById('classForm').reset();
-            document.getElementById('classModal').style.display = 'block';
+            // Reset form first
+            const form = document.getElementById('classForm');
+            if (form) form.reset();
+
+            // Set modal title and action
+            const modalTitle = document.getElementById('modalTitle');
+            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-school"></i> Add New Class';
+
+            const formAction = document.getElementById('formAction');
+            if (formAction) formAction.value = 'create';
+
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) submitBtn.textContent = 'Create Class';
+
+            // Clear class ID for new class
+            const classId = document.getElementById('classId');
+            if (classId) classId.value = '';
+
+            // Open modal using responsive modal system
+            if (classModal) {
+                classModal.open();
+            }
         }
 
         function editClass(classId) {
@@ -392,7 +541,9 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         document.getElementById('className').value = data.class.name;
                         document.getElementById('classDescription').value = data.class.description || '';
 
-                        document.getElementById('classModal').style.display = 'block';
+                        if (classModal) {
+                            classModal.open();
+                        }
                     } else {
                         alert('Error: ' + data.message);
                     }
@@ -430,10 +581,12 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
 
         function closeModal() {
-            document.getElementById('classModal').style.display = 'none';
+            if (classModal) {
+                classModal.close();
+            }
         }
 
-
+        // Enhanced form submission
         document.getElementById('classForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -441,7 +594,7 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.textContent;
 
-            submitBtn.textContent = 'Processing...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitBtn.disabled = true;
 
             fetch('manage_class.php', {
@@ -451,33 +604,39 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     },
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status);
+                    }
+                    return response.text().then(text => {
+                        console.log('Response text:', text);
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('JSON parse error:', e);
+                            throw new Error('Invalid JSON response: ' + text);
+                        }
+                    });
+                })
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        alert('✓ ' + data.message);
                         closeModal();
-                        location.reload();
+                        setTimeout(() => location.reload(), 1000);
                     } else {
-                        alert('Error: ' + data.message);
+                        alert('✗ Error: ' + data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while processing the request');
+                    alert('✗ An error occurred while processing the request');
                 })
                 .finally(() => {
-                    submitBtn.textContent = originalText;
+                    submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 });
         });
-
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('classModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
     </script>
 </body>
 

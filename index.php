@@ -42,8 +42,7 @@ if (isset($_SESSION['user_role'])) {
                 <a href="#contact">Contact</a>
             </nav>
             <div class="cta-buttons">
-                <a href="login.php" class="btn btn-secondary">Login</a>
-                <a href="register.php" class="btn btn-primary">Get Started</a>
+                <a href="login.php" class="btn btn-primary">Login</a>
             </div>
         </div>
     </header>
@@ -61,7 +60,7 @@ if (isset($_SESSION['user_role'])) {
                 <p>Join thousands of students and educators in our comprehensive Learning Management System. Access
                     courses, track progress, and achieve your educational goals with cutting-edge technology.</p>
                 <div class="hero-buttons">
-                    <a href="register.php" class="btn btn-white btn-large">Start Learning Today</a>
+                    <a href="login.php" class="btn btn-white btn-large">Access Learning Portal</a>
                     <a href="#features" class="btn btn-outline btn-large">Explore Features</a>
                 </div>
             </div>
@@ -175,11 +174,11 @@ if (isset($_SESSION['user_role'])) {
         <div style="max-width: 800px; margin: 0 auto; padding: 0 2rem;">
             <h2
                 style="font-size: 2.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                Ready to Start Your Learning Journey?</h2>
-            <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">Join our community of learners and educators
-                today. Create your account and unlock access to world-class educational content.</p>
+                Ready to Access Your Learning Portal?</h2>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">Access our comprehensive learning management system.
+                Contact your administrator for account access and unlock world-class educational content.</p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="register.php" class="btn btn-primary btn-large">Create Account</a>
+                <a href="login.php" class="btn btn-primary btn-large">Access Portal</a>
                 <a href="login.php" class="btn btn-secondary btn-large">Sign In</a>
             </div>
         </div>

@@ -7,6 +7,38 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     exit;
 }
 
+// Simple audit logging function
+function logAdminAction($conn, $user_id, $action, $details)
+{
+    try {
+        $query = "INSERT INTO admin_logs (user_id, action, details, created_at) VALUES (?, ?, ?, NOW())";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("iss", $user_id, $action, $details);
+        $stmt->execute();
+    } catch (Exception $e) {
+        // If admin_logs table doesn't exist, create it
+        try {
+            $create_table = "CREATE TABLE IF NOT EXISTS admin_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                action VARCHAR(100) NOT NULL,
+                details TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_user_id (user_id),
+                INDEX idx_created_at (created_at)
+            )";
+            $conn->query($create_table);
+
+            // Try logging again
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("iss", $user_id, $action, $details);
+            $stmt->execute();
+        } catch (Exception $e2) {
+            // Silently fail if we can't create the table
+        }
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
     header('Content-Type: application/json');
 
@@ -17,17 +49,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
 
+            // Enhanced validation
             if (empty($name)) {
                 echo json_encode(['success' => false, 'message' => 'Subject name is required']);
                 exit;
             }
 
-            $query = "SELECT id FROM subjects WHERE name = ?";
+            if (strlen($name) < 2) {
+                echo json_encode(['success' => false, 'message' => 'Subject name must be at least 2 characters long']);
+                exit;
+            }
+
+            if (strlen($name) > 100) {
+                echo json_encode(['success' => false, 'message' => 'Subject name cannot exceed 100 characters']);
+                exit;
+            }
+
+            if (!preg_match('/^[a-zA-Z0-9\s\-&()]+$/', $name)) {
+                echo json_encode(['success' => false, 'message' => 'Subject name contains invalid characters']);
+                exit;
+            }
+
+            if (!empty($description) && strlen($description) > 500) {
+                echo json_encode(['success' => false, 'message' => 'Description cannot exceed 500 characters']);
+                exit;
+            }
+
+            // Check for duplicate names (case-insensitive)
+            $query = "SELECT id FROM subjects WHERE LOWER(name) = LOWER(?)";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("s", $name);
             $stmt->execute();
             if ($stmt->get_result()->num_rows > 0) {
-                echo json_encode(['success' => false, 'message' => 'Subject name already exists']);
+                echo json_encode(['success' => false, 'message' => 'A subject with this name already exists']);
                 exit;
             }
 
@@ -36,9 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $stmt->bind_param("ss", $name, $description);
 
             if ($stmt->execute()) {
+                $subject_id = $conn->insert_id;
+                logAdminAction($conn, $_SESSION['user_id'], 'CREATE_SUBJECT', "Created subject: $name (ID: $subject_id)");
                 echo json_encode(['success' => true, 'message' => 'Subject created successfully']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to create subject']);
+                echo json_encode(['success' => false, 'message' => 'Failed to create subject: ' . $conn->error]);
             }
             exit;
 
@@ -47,17 +103,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
 
-            if ($id <= 0 || empty($name)) {
-                echo json_encode(['success' => false, 'message' => 'Subject ID and name are required']);
+            // Enhanced validation
+            if ($id <= 0) {
+                echo json_encode(['success' => false, 'message' => 'Invalid subject ID']);
                 exit;
             }
 
-            $query = "SELECT id FROM subjects WHERE name = ? AND id != ?";
+            if (empty($name)) {
+                echo json_encode(['success' => false, 'message' => 'Subject name is required']);
+                exit;
+            }
+
+            if (strlen($name) < 2) {
+                echo json_encode(['success' => false, 'message' => 'Subject name must be at least 2 characters long']);
+                exit;
+            }
+
+            if (strlen($name) > 100) {
+                echo json_encode(['success' => false, 'message' => 'Subject name cannot exceed 100 characters']);
+                exit;
+            }
+
+            if (!preg_match('/^[a-zA-Z0-9\s\-&()]+$/', $name)) {
+                echo json_encode(['success' => false, 'message' => 'Subject name contains invalid characters']);
+                exit;
+            }
+
+            if (!empty($description) && strlen($description) > 500) {
+                echo json_encode(['success' => false, 'message' => 'Description cannot exceed 500 characters']);
+                exit;
+            }
+
+            // Check if subject exists
+            $query = "SELECT id FROM subjects WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows === 0) {
+                echo json_encode(['success' => false, 'message' => 'Subject not found']);
+                exit;
+            }
+
+            // Check for duplicate names (case-insensitive, excluding current record)
+            $query = "SELECT id FROM subjects WHERE LOWER(name) = LOWER(?) AND id != ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("si", $name, $id);
             $stmt->execute();
             if ($stmt->get_result()->num_rows > 0) {
-                echo json_encode(['success' => false, 'message' => 'Subject name already exists']);
+                echo json_encode(['success' => false, 'message' => 'A subject with this name already exists']);
                 exit;
             }
 
@@ -65,10 +158,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $stmt = $conn->prepare($query);
             $stmt->bind_param("ssi", $name, $description, $id);
 
-            echo json_encode([
-                'success' => $stmt->execute(),
-                'message' => $stmt->execute() ? 'Subject updated successfully' : 'Failed to update subject'
-            ]);
+            if ($stmt->execute()) {
+                if ($stmt->affected_rows > 0) {
+                    logAdminAction($conn, $_SESSION['user_id'], 'UPDATE_SUBJECT', "Updated subject: $name (ID: $id)");
+                    echo json_encode(['success' => true, 'message' => 'Subject updated successfully']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'No changes were made']);
+                }
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to update subject: ' . $conn->error]);
+            }
             exit;
 
         case 'delete':
@@ -78,14 +177,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
+            // Check if subject exists and get name
+            $query = "SELECT name FROM subjects WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows === 0) {
+                echo json_encode(['success' => false, 'message' => 'Subject not found']);
+                exit;
+            }
+            $subject_name = $result->fetch_assoc()['name'];
+
+            // Check for dependencies - teacher assignments
             $query = "SELECT COUNT(*) as count FROM teacher_subject_class WHERE subject_id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
             $stmt->execute();
             $teacher_count = $stmt->get_result()->fetch_assoc()['count'];
 
-            if ($teacher_count > 0) {
-                echo json_encode(['success' => false, 'message' => 'Cannot delete subject with assigned teachers']);
+            // Check for dependencies - quizzes
+            $quiz_count = 0;
+            try {
+                $query = "SELECT COUNT(*) as count FROM quizzes WHERE subject_id = ?";
+                $stmt = $conn->prepare($query);
+                $stmt->bind_param("i", $id);
+                $stmt->execute();
+                $quiz_count = $stmt->get_result()->fetch_assoc()['count'];
+            } catch (Exception $e) {
+                // Quizzes table might not have subject_id column
+            }
+
+            if ($teacher_count > 0 || $quiz_count > 0) {
+                $dependencies = [];
+                if ($teacher_count > 0) $dependencies[] = "$teacher_count teacher assignment(s)";
+                if ($quiz_count > 0) $dependencies[] = "$quiz_count quiz(es)";
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Cannot delete subject '$subject_name'. It has " . implode(', ', $dependencies) . ". Please remove these dependencies first."
+                ]);
                 exit;
             }
 
@@ -93,10 +224,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
 
-            echo json_encode([
-                'success' => $stmt->execute(),
-                'message' => $stmt->execute() ? 'Subject deleted successfully' : 'Failed to delete subject'
-            ]);
+            if ($stmt->execute()) {
+                if ($stmt->affected_rows > 0) {
+                    logAdminAction($conn, $_SESSION['user_id'], 'DELETE_SUBJECT', "Deleted subject: $subject_name (ID: $id)");
+                    echo json_encode(['success' => true, 'message' => "Subject '$subject_name' deleted successfully"]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Subject not found']);
+                }
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to delete subject: ' . $conn->error]);
+            }
             exit;
 
         case 'get':
@@ -161,6 +298,7 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
+    <link rel="stylesheet" href="../assets/css/responsive-modal.css">
 </head>
 
 <body>
@@ -461,6 +599,143 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     <!-- Enhanced CSS Styles -->
     <style>
+        /* Enhanced Modal Padding */
+        .modal-content {
+            padding: 0 !important;
+        }
+
+        .modal-header {
+            padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+        }
+
+        .modal-body {
+            padding: 0 2.5rem 2.5rem 2.5rem !important;
+        }
+
+        .form-group {
+            margin-bottom: 2rem !important;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .form-actions {
+            margin-top: 2.5rem !important;
+            padding-top: 2rem !important;
+            border-top: 2px solid #e5e7eb !important;
+        }
+
+        /* Enhanced form styling */
+        .form-group label {
+            margin-bottom: 0.75rem !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            color: #374151 !important;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            border-radius: 10px !important;
+            border: 2px solid #e5e7eb !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+            outline: none !important;
+        }
+
+        .form-group textarea {
+            resize: vertical !important;
+            min-height: 120px !important;
+        }
+
+        /* Enhanced button styling */
+        .form-actions .btn {
+            padding: 1rem 2rem !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
+            min-width: 140px !important;
+        }
+
+        /* Subject preview styling */
+        .subject-preview {
+            margin-top: 2rem !important;
+            padding: 1.5rem !important;
+            border-radius: 12px !important;
+        }
+
+        /* Responsive padding adjustments */
+        @media (max-width: 768px) {
+            .modal-header {
+                padding: 1.5rem 2rem 1rem 2rem !important;
+            }
+
+            .modal-body {
+                padding: 0 2rem 2rem 2rem !important;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem !important;
+            }
+
+            .form-actions {
+                margin-top: 2rem !important;
+                padding-top: 1.5rem !important;
+            }
+
+            .form-actions .btn {
+                padding: 0.875rem 1.5rem !important;
+                min-width: 120px !important;
+            }
+
+            .subject-preview {
+                margin-top: 1.5rem !important;
+                padding: 1.25rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-header {
+                padding: 1rem 1.5rem 0.75rem 1.5rem !important;
+            }
+
+            .modal-body {
+                padding: 0 1.5rem 1.5rem 1.5rem !important;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem !important;
+            }
+
+            .form-actions {
+                margin-top: 1.5rem !important;
+                padding-top: 1.25rem !important;
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+
+            .form-actions .btn {
+                width: 100% !important;
+                padding: 1rem !important;
+                min-width: auto !important;
+            }
+
+            .subject-preview {
+                margin-top: 1.25rem !important;
+                padding: 1rem !important;
+            }
+        }
+
         /* Enhanced Subject Info */
         .subject-info {
             display: flex;
@@ -690,20 +965,53 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </style>
 
     <!-- Enhanced JavaScript -->
+    <script src="../assets/js/responsive-modal.js"></script>
     <script>
+        // Initialize responsive modal
+        let subjectModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            subjectModal = new ResponsiveModal('subjectModal');
+
+            // Add change listeners for subject preview
+            document.getElementById('subjectName').addEventListener('input', updateSubjectPreview);
+            document.getElementById('subjectDescription').addEventListener('input', updateSubjectPreview);
+        });
+
         // Enhanced modal functions
         function openCreateModal() {
-            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-book-open"></i> Add New Subject';
-            document.getElementById('formAction').value = 'create';
-            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-book-open"></i> Create Subject';
-            document.getElementById('subjectForm').reset();
-            document.getElementById('subjectPreview').style.display = 'none';
-            document.getElementById('subjectModal').style.display = 'block';
-            document.getElementById('subjectName').focus();
+            // Reset form first
+            const form = document.getElementById('subjectForm');
+            if (form) form.reset();
+
+            // Set modal title and action
+            const modalTitle = document.getElementById('modalTitle');
+            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-book-open"></i> Add New Subject';
+
+            const formAction = document.getElementById('formAction');
+            if (formAction) formAction.value = 'create';
+
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-book-open"></i> Create Subject';
+
+            // Clear subject ID for new subject
+            const subjectId = document.getElementById('subjectId');
+            if (subjectId) subjectId.value = '';
+
+            // Hide preview
+            const preview = document.getElementById('subjectPreview');
+            if (preview) preview.style.display = 'none';
+
+            // Open modal using responsive modal system
+            if (subjectModal) {
+                subjectModal.open();
+            }
         }
 
         function closeModal() {
-            document.getElementById('subjectModal').style.display = 'none';
+            if (subjectModal) {
+                subjectModal.close();
+            }
         }
 
         // Enhanced edit function
@@ -728,8 +1036,9 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         document.getElementById('subjectDescription').value = data.subject.description || '';
 
                         updateSubjectPreview();
-                        document.getElementById('subjectModal').style.display = 'block';
-                        document.getElementById('subjectName').focus();
+                        if (subjectModal) {
+                            subjectModal.open();
+                        }
                     } else {
                         showNotification('Error: ' + data.message, 'error');
                     }
@@ -857,12 +1166,26 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     },
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status);
+                    }
+                    return response.text().then(text => {
+                        console.log('Response text:', text);
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('JSON parse error:', e);
+                            throw new Error('Invalid JSON response: ' + text);
+                        }
+                    });
+                })
                 .then(data => {
                     if (data.success) {
                         showNotification(data.message, 'success');
                         closeModal();
-                        location.reload();
+                        setTimeout(() => location.reload(), 1000);
                     } else {
                         showNotification('Error: ' + data.message, 'error');
                     }
@@ -876,21 +1199,6 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     submitBtn.disabled = false;
                 });
         });
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add change listeners for subject preview
-            document.getElementById('subjectName').addEventListener('input', updateSubjectPreview);
-            document.getElementById('subjectDescription').addEventListener('input', updateSubjectPreview);
-        });
-
-        // Modal click outside to close
-        window.onclick = function(event) {
-            const modal = document.getElementById('subjectModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
     </script>
 </body>
 

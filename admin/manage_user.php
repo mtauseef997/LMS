@@ -12,6 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
 
     $action = $_POST['action'] ?? '';
 
+    // Debug logging
+    error_log("Admin action: " . $action . " by user: " . $_SESSION['user_id']);
+
     switch ($action) {
         case 'create':
             $name = trim($_POST['name'] ?? '');
@@ -155,6 +158,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 echo json_encode(['success' => false, 'message' => 'Failed to reset password']);
             }
             exit;
+
+        default:
+            echo json_encode(['success' => false, 'message' => 'Unknown action: ' . $action]);
+            exit;
     }
 }
 
@@ -202,6 +209,7 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
+    <link rel="stylesheet" href="../assets/css/responsive-modal.css">
 </head>
 
 <body>
@@ -394,48 +402,208 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
+    <!-- Custom User Management Styles -->
+    <style>
+        /* Enhanced Modal Padding */
+        .modal-content {
+            padding: 0 !important;
+        }
+
+        .modal-header {
+            padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+        }
+
+        .modal-body {
+            padding: 0 2.5rem 2.5rem 2.5rem !important;
+        }
+
+        .form-group {
+            margin-bottom: 2rem !important;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .form-actions {
+            margin-top: 2.5rem !important;
+            padding-top: 2rem !important;
+            border-top: 2px solid #e5e7eb !important;
+        }
+
+        /* User role badges */
+        .user-role-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .user-role-badge.admin {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .user-role-badge.teacher {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .user-role-badge.student {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        /* Enhanced form styling */
+        .form-group label {
+            margin-bottom: 0.75rem !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            border-radius: 10px !important;
+            border: 2px solid #e5e7eb !important;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+        }
+
+        /* Responsive padding adjustments */
+        @media (max-width: 768px) {
+            .modal-header {
+                padding: 1.5rem 2rem 1rem 2rem !important;
+            }
+
+            .modal-body {
+                padding: 0 2rem 2rem 2rem !important;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem !important;
+            }
+
+            .form-actions {
+                margin-top: 2rem !important;
+                padding-top: 1.5rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-header {
+                padding: 1rem 1.5rem 0.75rem 1.5rem !important;
+            }
+
+            .modal-body {
+                padding: 0 1.5rem 1.5rem 1.5rem !important;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem !important;
+            }
+
+            .form-actions {
+                margin-top: 1.5rem !important;
+                padding-top: 1.25rem !important;
+            }
+        }
+    </style>
+
+    <script src="../assets/js/responsive-modal.js"></script>
     <script>
+        // Initialize responsive modal
+        let userModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            userModal = new ResponsiveModal('userModal');
+        });
+
         function openCreateModal() {
-            document.getElementById('modalTitle').textContent = 'Add New User';
+            // Reset form and set up for creation
+            const form = document.getElementById('userForm');
+            if (form) form.reset();
+
+            // Set modal title and action
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Add New User';
             document.getElementById('formAction').value = 'create';
             document.getElementById('submitBtn').textContent = 'Create User';
-            document.getElementById('passwordGroup').style.display = 'block';
-            document.getElementById('userPassword').required = true;
-            document.getElementById('userForm').reset();
-            document.getElementById('userModal').style.display = 'block';
+
+            // Show password field for new users
+            const passwordGroup = document.getElementById('passwordGroup');
+            const passwordField = document.getElementById('userPassword');
+            if (passwordGroup && passwordField) {
+                passwordGroup.style.display = 'block';
+                passwordField.required = true;
+            }
+
+            // Clear user ID for new user
+            document.getElementById('userId').value = '';
+
+            // Open modal using responsive modal system
+            if (userModal) {
+                userModal.open();
+            }
         }
 
         function editUser(userId) {
+            if (!userId) {
+                alert('Invalid user ID');
+                return;
+            }
+
             fetch('manage_user.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=get&id=' + userId
+                    body: 'action=get&id=' + encodeURIComponent(userId)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.success) {
-                        document.getElementById('modalTitle').textContent = 'Edit User';
+                    if (data.success && data.user) {
+                        // Set modal title and action
+                        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit User';
                         document.getElementById('formAction').value = 'update';
                         document.getElementById('submitBtn').textContent = 'Update User';
-                        document.getElementById('passwordGroup').style.display = 'none';
-                        document.getElementById('userPassword').required = false;
 
-                        document.getElementById('userId').value = data.user.id;
-                        document.getElementById('userName').value = data.user.name;
-                        document.getElementById('userEmail').value = data.user.email;
-                        document.getElementById('userRole').value = data.user.role;
+                        // Hide password field for editing
+                        const passwordGroup = document.getElementById('passwordGroup');
+                        const passwordField = document.getElementById('userPassword');
+                        if (passwordGroup && passwordField) {
+                            passwordGroup.style.display = 'none';
+                            passwordField.required = false;
+                        }
 
-                        document.getElementById('userModal').style.display = 'block';
+                        // Populate form fields
+                        document.getElementById('userId').value = data.user.id || '';
+                        document.getElementById('userName').value = data.user.name || '';
+                        document.getElementById('userEmail').value = data.user.email || '';
+                        document.getElementById('userRole').value = data.user.role || '';
+
+                        // Show modal using responsive modal system
+                        if (userModal) {
+                            userModal.open();
+                        }
                     } else {
-                        alert('Error: ' + data.message);
+                        alert('Error: ' + (data.message || 'Failed to load user data'));
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while fetching user data');
+                    alert('An error occurred while fetching user data. Please try again.');
                 });
         }
 
@@ -496,8 +664,12 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
 
         function closeModal() {
-            document.getElementById('userModal').style.display = 'none';
+            if (userModal) {
+                userModal.close();
+            }
         }
+
+        // Enhanced form submission
         document.getElementById('userForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -505,7 +677,7 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.textContent;
 
-            submitBtn.textContent = 'Processing...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitBtn.disabled = true;
 
             fetch('manage_user.php', {
@@ -515,32 +687,30 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     },
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        alert('✓ ' + data.message);
                         closeModal();
-                        location.reload();
+                        setTimeout(() => location.reload(), 1000);
                     } else {
-                        alert('Error: ' + data.message);
+                        alert('✗ Error: ' + data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while processing the request');
+                    alert('✗ An error occurred while processing the request');
                 })
                 .finally(() => {
-                    submitBtn.textContent = originalText;
+                    submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 });
         });
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('userModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
     </script>
 </body>
 

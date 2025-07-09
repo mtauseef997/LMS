@@ -332,8 +332,14 @@ try {
                     <p>Comprehensive overview of system statistics and activity</p>
                 </div>
                 <div class="header-right">
+                    <button class="export-btn" onclick="exportReport('csv')">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
                     <button class="export-btn" onclick="window.print()">
                         <i class="fas fa-print"></i> Print Report
+                    </button>
+                    <button class="export-btn" onclick="refreshReport()">
+                        <i class="fas fa-sync"></i> Refresh
                     </button>
                     <a href="dashboard.php" class="export-btn" style="background: #6c757d;">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
@@ -554,10 +560,78 @@ try {
     </div>
 
     <script>
+        // Auto-refresh every 5 minutes
         setTimeout(function() {
             location.reload();
         }, 300000);
+
+        // Export functionality
+        function exportReport(format) {
+            if (format === 'csv') {
+                // Create CSV data
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "Report Type,Value\n";
+                csvContent += "Total Users,<?php echo $stats['total_users']; ?>\n";
+                csvContent += "Students,<?php echo $stats['total_students']; ?>\n";
+                csvContent += "Teachers,<?php echo $stats['total_teachers']; ?>\n";
+                csvContent += "Administrators,<?php echo $stats['total_admins']; ?>\n";
+                csvContent += "Classes,<?php echo $stats['total_classes']; ?>\n";
+                csvContent += "Subjects,<?php echo $stats['total_subjects']; ?>\n";
+                csvContent += "Teacher Assignments,<?php echo $stats['total_assignments']; ?>\n";
+                csvContent += "Student Enrollments,<?php echo $stats['total_enrollments']; ?>\n";
+                csvContent += "Total Quizzes,<?php echo $stats['total_quizzes']; ?>\n";
+                csvContent += "Quiz Submissions,<?php echo $stats['total_quiz_submissions']; ?>\n";
+                csvContent += "Total Assignments,<?php echo $stats['total_assignments_hw']; ?>\n";
+                csvContent += "Assignment Submissions,<?php echo $stats['total_assignment_submissions']; ?>\n";
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "lms_report_" + new Date().toISOString().split('T')[0] + ".csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function refreshReport() {
+            location.reload();
+        }
+
+        // Print styles
+        window.addEventListener('beforeprint', function() {
+            document.body.classList.add('printing');
+        });
+
+        window.addEventListener('afterprint', function() {
+            document.body.classList.remove('printing');
+        });
     </script>
+
+    <style>
+        @media print {
+
+            .sidebar,
+            .header-right,
+            .export-btn {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            .report-card {
+                break-inside: avoid;
+                margin-bottom: 1rem;
+            }
+
+            body {
+                font-size: 12px;
+            }
+        }
+    </style>
 </body>
 
 </html>

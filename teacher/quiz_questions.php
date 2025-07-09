@@ -103,7 +103,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
     }
 }
 
-$questions_query = "SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY question_order, id";
+// Check if required columns exist
+$columns_check = $conn->query("SHOW COLUMNS FROM quiz_questions");
+$existing_columns = [];
+if ($columns_check) {
+    while ($column = $columns_check->fetch_assoc()) {
+        $existing_columns[] = $column['Field'];
+    }
+}
+
+$has_question_order = in_array('question_order', $existing_columns);
+$has_marks = in_array('marks', $existing_columns);
+$has_explanation = in_array('explanation', $existing_columns);
+
+// If critical columns are missing, redirect to fix script
+if (!$has_marks) {
+    echo "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; margin: 1rem; border-radius: 5px;'>";
+    echo "<h3>⚠️ Database Schema Issue</h3>";
+    echo "<p>The quiz_questions table is missing required columns. Please run the database fix script.</p>";
+    echo "<p><a href='../fix_all_quiz_tables.php' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Fix Database Now</a></p>";
+    echo "</div>";
+    exit;
+}
+
+// Use appropriate ORDER BY clause based on column availability
+if ($has_question_order) {
+    $questions_query = "SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY question_order, id";
+} else {
+    $questions_query = "SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY id";
+}
+
 $questions_stmt = $conn->prepare($questions_query);
 $questions_stmt->bind_param("i", $quiz_id);
 $questions_stmt->execute();
