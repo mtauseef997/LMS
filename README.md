@@ -29,16 +29,6 @@ A role-based Learning Management System (LMS) built with PHP, MySQL, Bootstrap, 
 - Submit assignments and quizzes
 - View grades, feedback, and attendance
 - Access learning materials
-
-### 💰 Fees & Salaries (Extended)
-- Class-wise fee setup and payment tracking
-- Teacher salary management
-- View paid/unpaid reports
-
-### 📅 Activity/Event Management
-- Create and manage school events
-- Student participation tracking
-
 ---
 
 ## 🗂️ Folder Structure
