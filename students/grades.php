@@ -72,7 +72,7 @@ try {
     $assignment_stmt->execute();
     $assignment_grades = $assignment_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 } catch (Exception $e) {
-    // If query fails, show empty assignment grades
+
     $assignment_grades = [];
     $error_message = "Database error: Some assignment grade data may not be available.";
 }
@@ -95,7 +95,7 @@ try {
     $stats_stmt->execute();
     $stats = $stats_stmt->get_result()->fetch_assoc();
 } catch (Exception $e) {
-    // If query fails, provide default stats
+
     $stats = [
         'total_quizzes' => 0,
         'avg_quiz_percentage' => 0,
@@ -117,68 +117,69 @@ try {
     <title>My Grades - EduLearn LMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <style>
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
-        }
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+    }
 
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
 
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
 
-        .grade-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 0.8rem;
-        }
+    .grade-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
 
-        .grade-a {
-            background: #dcfce7;
-            color: #166534;
-        }
+    .grade-a {
+        background: #dcfce7;
+        color: #166534;
+    }
 
-        .grade-b {
-            background: #dbeafe;
-            color: #1e40af;
-        }
+    .grade-b {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-        .grade-c {
-            background: #fef3c7;
-            color: #92400e;
-        }
+    .grade-c {
+        background: #fef3c7;
+        color: #92400e;
+    }
 
-        .grade-d {
-            background: #fee2e2;
-            color: #991b1b;
-        }
+    .grade-d {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-        .grade-f {
-            background: #fecaca;
-            color: #7f1d1d;
-        }
+    .grade-f {
+        background: #fecaca;
+        color: #7f1d1d;
+    }
     </style>
 </head>
 
@@ -230,10 +231,10 @@ try {
             </header>
 
             <?php if (isset($error_message)): ?>
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <?php echo $error_message; ?>
-                </div>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <?php echo $error_message; ?>
+            </div>
             <?php endif; ?>
 
             <div class="stats-grid">
@@ -262,17 +263,18 @@ try {
                         <select name="subject" id="subject" onchange="this.form.submit()">
                             <option value="">All Subjects</option>
                             <?php foreach ($subjects as $subject): ?>
-                                <option value="<?php echo $subject['id']; ?>" <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($subject['name']); ?>
-                                </option>
+                            <option value="<?php echo $subject['id']; ?>"
+                                <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($subject['name']); ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
 
                     <?php if (!empty($subject_filter)): ?>
-                        <a href="grades.php" class="btn btn-outline">
-                            <i class="fas fa-times"></i> Clear Filter
-                        </a>
+                    <a href="grades.php" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Clear Filter
+                    </a>
                     <?php endif; ?>
                 </form>
             </div>
@@ -283,26 +285,26 @@ try {
                 </div>
                 <div class="card-content">
                     <?php if (empty($quiz_grades)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No quiz grades found.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No quiz grades found.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Quiz Title</th>
-                                        <th>Subject</th>
-                                        <th>Class</th>
-                                        <th>Score</th>
-                                        <th>Percentage</th>
-                                        <th>Grade</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($quiz_grades as $grade): ?>
-                                        <?php
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Quiz Title</th>
+                                    <th>Subject</th>
+                                    <th>Class</th>
+                                    <th>Score</th>
+                                    <th>Percentage</th>
+                                    <th>Grade</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($quiz_grades as $grade): ?>
+                                <?php
                                         $percentage = $grade['percentage'];
                                         $letter_grade = '';
                                         $grade_class = '';
@@ -323,25 +325,27 @@ try {
                                             $grade_class = 'grade-f';
                                         }
                                         ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($grade['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
-                                            <td><?php
+                                <tr>
+                                    <td><?php echo htmlspecialchars($grade['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
+                                    <td><?php
                                                 if (isset($grade['score']) && isset($grade['max_marks'])) {
                                                     echo $grade['score'] . '/' . $grade['max_marks'];
                                                 } else {
                                                     echo 'Not graded';
                                                 }
                                                 ?></td>
-                                            <td><?php echo number_format($percentage, 1); ?>%</td>
-                                            <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
-                                            <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                    <td><?php echo number_format($percentage, 1); ?>%</td>
+                                    <td><span
+                                            class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span>
+                                    </td>
+                                    <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -352,28 +356,28 @@ try {
                 </div>
                 <div class="card-content">
                     <?php if (empty($assignment_grades)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No assignment grades found.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No assignment grades found.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Assignment Title</th>
-                                        <th>Subject</th>
-                                        <th>Class</th>
-                                        <th>Score</th>
-                                        <th>Percentage</th>
-                                        <th>Grade</th>
-                                        <th>Feedback</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($assignment_grades as $grade): ?>
-                                        <?php
-                                        // Handle missing score or max_marks columns
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Assignment Title</th>
+                                    <th>Subject</th>
+                                    <th>Class</th>
+                                    <th>Score</th>
+                                    <th>Percentage</th>
+                                    <th>Grade</th>
+                                    <th>Feedback</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($assignment_grades as $grade): ?>
+                                <?php
+
                                         if (isset($grade['score']) && isset($grade['max_marks']) && $grade['max_marks'] > 0) {
                                             $percentage = ($grade['score'] / $grade['max_marks']) * 100;
                                         } else {
@@ -398,26 +402,29 @@ try {
                                             $grade_class = 'grade-f';
                                         }
                                         ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($grade['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
-                                            <td><?php
+                                <tr>
+                                    <td><?php echo htmlspecialchars($grade['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['subject_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['class_name']); ?></td>
+                                    <td><?php
                                                 if (isset($grade['score']) && isset($grade['max_marks'])) {
                                                     echo $grade['score'] . '/' . $grade['max_marks'];
                                                 } else {
                                                     echo 'Not graded';
                                                 }
                                                 ?></td>
-                                            <td><?php echo number_format($percentage, 1); ?>%</td>
-                                            <td><span class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span></td>
-                                            <td><?php echo $grade['feedback'] ? htmlspecialchars($grade['feedback']) : '-'; ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                    <td><?php echo number_format($percentage, 1); ?>%</td>
+                                    <td><span
+                                            class="grade-badge <?php echo $grade_class; ?>"><?php echo $letter_grade; ?></span>
+                                    </td>
+                                    <td><?php echo $grade['feedback'] ? htmlspecialchars($grade['feedback']) : '-'; ?>
+                                    </td>
+                                    <td><?php echo date('M j, Y', strtotime($grade['submitted_at'])); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>

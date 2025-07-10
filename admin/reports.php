@@ -193,88 +193,88 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
     <style>
-        .report-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
+    .report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
 
-        .report-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    .report-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-        .report-card h3 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 0.5rem;
-        }
+    .report-card h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
 
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
 
-        .stat-item:last-child {
-            border-bottom: none;
-        }
+    .stat-item:last-child {
+        border-bottom: none;
+    }
 
-        .stat-label {
-            color: #666;
-        }
+    .stat-label {
+        color: #666;
+    }
 
-        .stat-value {
-            font-weight: 600;
-            color: #333;
-        }
+    .stat-value {
+        font-weight: 600;
+        color: #333;
+    }
 
-        .activity-item {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
+    .activity-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
 
-        .activity-item:last-child {
-            border-bottom: none;
-        }
+    .activity-item:last-child {
+        border-bottom: none;
+    }
 
-        .activity-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 0.25rem;
-        }
+    .activity-title {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
 
-        .activity-meta {
-            font-size: 0.85rem;
-            color: #666;
-        }
+    .activity-meta {
+        font-size: 0.85rem;
+        color: #666;
+    }
 
-        .export-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0.5rem 0.5rem 0.5rem 0;
-        }
+    .export-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.5rem 0.5rem 0.5rem 0;
+    }
 
-        .export-btn:hover {
-            transform: translateY(-2px);
-            color: white;
-            text-decoration: none;
-        }
+    .export-btn:hover {
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
     </style>
 </head>
 
@@ -348,7 +348,7 @@ try {
             </header>
 
             <div class="report-grid">
-                <!-- User Statistics -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-users"></i> User Statistics</h3>
                     <div class="stat-item">
@@ -369,7 +369,7 @@ try {
                     </div>
                 </div>
 
-                <!-- Academic Statistics -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-school"></i> Academic Statistics</h3>
                     <div class="stat-item">
@@ -390,7 +390,7 @@ try {
                     </div>
                 </div>
 
-                <!-- Quiz Statistics -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-question-circle"></i> Quiz Statistics</h3>
                     <div class="stat-item">
@@ -411,7 +411,7 @@ try {
                     </div>
                 </div>
 
-                <!-- Assignment Statistics -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-tasks"></i> Assignment Statistics</h3>
                     <div class="stat-item">
@@ -433,73 +433,72 @@ try {
                 </div>
             </div>
 
-            <!-- Recent Activity Section -->
             <div class="report-grid">
-                <!-- Recent Users -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-user-plus"></i> Recent User Registrations</h3>
                     <?php if (empty($recent_users)): ?>
-                        <p style="color: #666; text-align: center; padding: 1rem;">No users found</p>
+                    <p style="color: #666; text-align: center; padding: 1rem;">No users found</p>
                     <?php else: ?>
-                        <?php foreach (array_slice($recent_users, 0, 5) as $user): ?>
-                            <div class="activity-item">
-                                <div class="activity-title"><?php echo htmlspecialchars($user['name']); ?></div>
-                                <div class="activity-meta">
-                                    <?php echo ucfirst($user['role']); ?> • <?php echo htmlspecialchars($user['email']); ?>
-                                    <?php if ($user['created_at']): ?>
-                                        <br>Registered: <?php echo date('M j, Y', strtotime($user['created_at'])); ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                    <?php foreach (array_slice($recent_users, 0, 5) as $user): ?>
+                    <div class="activity-item">
+                        <div class="activity-title"><?php echo htmlspecialchars($user['name']); ?></div>
+                        <div class="activity-meta">
+                            <?php echo ucfirst($user['role']); ?> • <?php echo htmlspecialchars($user['email']); ?>
+                            <?php if ($user['created_at']): ?>
+                            <br>Registered: <?php echo date('M j, Y', strtotime($user['created_at'])); ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
 
-                <!-- Recent Quizzes -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-question-circle"></i> Recent Quizzes Created</h3>
                     <?php if (empty($recent_quizzes)): ?>
-                        <p style="color: #666; text-align: center; padding: 1rem;">No quizzes found</p>
+                    <p style="color: #666; text-align: center; padding: 1rem;">No quizzes found</p>
                     <?php else: ?>
-                        <?php foreach (array_slice($recent_quizzes, 0, 5) as $quiz): ?>
-                            <div class="activity-item">
-                                <div class="activity-title"><?php echo htmlspecialchars($quiz['title']); ?></div>
-                                <div class="activity-meta">
-                                    <?php echo htmlspecialchars($quiz['subject']); ?> -
-                                    <?php echo htmlspecialchars($quiz['class']); ?>
-                                    <br>By: <?php echo htmlspecialchars($quiz['teacher']); ?>
-                                    <?php if ($quiz['created_at']): ?>
-                                        • <?php echo date('M j, Y', strtotime($quiz['created_at'])); ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                    <?php foreach (array_slice($recent_quizzes, 0, 5) as $quiz): ?>
+                    <div class="activity-item">
+                        <div class="activity-title"><?php echo htmlspecialchars($quiz['title']); ?></div>
+                        <div class="activity-meta">
+                            <?php echo htmlspecialchars($quiz['subject']); ?> -
+                            <?php echo htmlspecialchars($quiz['class']); ?>
+                            <br>By: <?php echo htmlspecialchars($quiz['teacher']); ?>
+                            <?php if ($quiz['created_at']): ?>
+                            • <?php echo date('M j, Y', strtotime($quiz['created_at'])); ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
 
-                <!-- Recent Assignments -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-tasks"></i> Recent Assignments Created</h3>
                     <?php if (empty($recent_assignments)): ?>
-                        <p style="color: #666; text-align: center; padding: 1rem;">No assignments found</p>
+                    <p style="color: #666; text-align: center; padding: 1rem;">No assignments found</p>
                     <?php else: ?>
-                        <?php foreach (array_slice($recent_assignments, 0, 5) as $assignment): ?>
-                            <div class="activity-item">
-                                <div class="activity-title"><?php echo htmlspecialchars($assignment['title']); ?></div>
-                                <div class="activity-meta">
-                                    <?php echo htmlspecialchars($assignment['subject']); ?> -
-                                    <?php echo htmlspecialchars($assignment['class']); ?>
-                                    <br>By: <?php echo htmlspecialchars($assignment['teacher']); ?>
-                                    <?php if ($assignment['created_at']): ?>
-                                        • <?php echo date('M j, Y', strtotime($assignment['created_at'])); ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                    <?php foreach (array_slice($recent_assignments, 0, 5) as $assignment): ?>
+                    <div class="activity-item">
+                        <div class="activity-title"><?php echo htmlspecialchars($assignment['title']); ?></div>
+                        <div class="activity-meta">
+                            <?php echo htmlspecialchars($assignment['subject']); ?> -
+                            <?php echo htmlspecialchars($assignment['class']); ?>
+                            <br>By: <?php echo htmlspecialchars($assignment['teacher']); ?>
+                            <?php if ($assignment['created_at']): ?>
+                            • <?php echo date('M j, Y', strtotime($assignment['created_at'])); ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
 
-                <!-- System Health -->
+
                 <div class="report-card">
                     <h3><i class="fas fa-heartbeat"></i> System Health</h3>
                     <div class="stat-item">
@@ -524,7 +523,6 @@ try {
                 </div>
             </div>
 
-            <!-- Quick Actions -->
             <div class="content-card" style="margin-top: 2rem;">
                 <div class="card-header">
                     <h3>Quick Actions</h3>
@@ -560,77 +558,74 @@ try {
     </div>
 
     <script>
-        // Auto-refresh every 5 minutes
-        setTimeout(function() {
-            location.reload();
-        }, 300000);
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
 
-        // Export functionality
-        function exportReport(format) {
-            if (format === 'csv') {
-                // Create CSV data
-                let csvContent = "data:text/csv;charset=utf-8,";
-                csvContent += "Report Type,Value\n";
-                csvContent += "Total Users,<?php echo $stats['total_users']; ?>\n";
-                csvContent += "Students,<?php echo $stats['total_students']; ?>\n";
-                csvContent += "Teachers,<?php echo $stats['total_teachers']; ?>\n";
-                csvContent += "Administrators,<?php echo $stats['total_admins']; ?>\n";
-                csvContent += "Classes,<?php echo $stats['total_classes']; ?>\n";
-                csvContent += "Subjects,<?php echo $stats['total_subjects']; ?>\n";
-                csvContent += "Teacher Assignments,<?php echo $stats['total_assignments']; ?>\n";
-                csvContent += "Student Enrollments,<?php echo $stats['total_enrollments']; ?>\n";
-                csvContent += "Total Quizzes,<?php echo $stats['total_quizzes']; ?>\n";
-                csvContent += "Quiz Submissions,<?php echo $stats['total_quiz_submissions']; ?>\n";
-                csvContent += "Total Assignments,<?php echo $stats['total_assignments_hw']; ?>\n";
-                csvContent += "Assignment Submissions,<?php echo $stats['total_assignment_submissions']; ?>\n";
+    function exportReport(format) {
+        if (format === 'csv') {
 
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "lms_report_" + new Date().toISOString().split('T')[0] + ".csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Report Type,Value\n";
+            csvContent += "Total Users,<?php echo $stats['total_users']; ?>\n";
+            csvContent += "Students,<?php echo $stats['total_students']; ?>\n";
+            csvContent += "Teachers,<?php echo $stats['total_teachers']; ?>\n";
+            csvContent += "Administrators,<?php echo $stats['total_admins']; ?>\n";
+            csvContent += "Classes,<?php echo $stats['total_classes']; ?>\n";
+            csvContent += "Subjects,<?php echo $stats['total_subjects']; ?>\n";
+            csvContent += "Teacher Assignments,<?php echo $stats['total_assignments']; ?>\n";
+            csvContent += "Student Enrollments,<?php echo $stats['total_enrollments']; ?>\n";
+            csvContent += "Total Quizzes,<?php echo $stats['total_quizzes']; ?>\n";
+            csvContent += "Quiz Submissions,<?php echo $stats['total_quiz_submissions']; ?>\n";
+            csvContent += "Total Assignments,<?php echo $stats['total_assignments_hw']; ?>\n";
+            csvContent += "Assignment Submissions,<?php echo $stats['total_assignment_submissions']; ?>\n";
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "lms_report_" + new Date().toISOString().split('T')[0] + ".csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
+    }
 
-        function refreshReport() {
-            location.reload();
-        }
+    function refreshReport() {
+        location.reload();
+    }
 
-        // Print styles
-        window.addEventListener('beforeprint', function() {
-            document.body.classList.add('printing');
-        });
+    window.addEventListener('beforeprint', function() {
+        document.body.classList.add('printing');
+    });
 
-        window.addEventListener('afterprint', function() {
-            document.body.classList.remove('printing');
-        });
+    window.addEventListener('afterprint', function() {
+        document.body.classList.remove('printing');
+    });
     </script>
 
     <style>
-        @media print {
+    @media print {
 
-            .sidebar,
-            .header-right,
-            .export-btn {
-                display: none !important;
-            }
-
-            .main-content {
-                margin-left: 0 !important;
-                width: 100% !important;
-            }
-
-            .report-card {
-                break-inside: avoid;
-                margin-bottom: 1rem;
-            }
-
-            body {
-                font-size: 12px;
-            }
+        .sidebar,
+        .header-right,
+        .export-btn {
+            display: none !important;
         }
+
+        .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        .report-card {
+            break-inside: avoid;
+            margin-bottom: 1rem;
+        }
+
+        body {
+            font-size: 12px;
+        }
+    }
     </style>
 </body>
 

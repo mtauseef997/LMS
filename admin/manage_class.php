@@ -284,49 +284,49 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
                 <div class="card-content">
                     <?php if (empty($classes)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No classes found matching your criteria.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No classes found matching your criteria.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Class Name</th>
-                                        <th>Description</th>
-                                        <th>Students</th>
-                                        <th>Teachers</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($classes as $class): ?>
-                                        <tr>
-                                            <td><?php echo $class['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($class['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($class['description'] ?: 'No description'); ?></td>
-                                            <td><?php echo $class['student_count']; ?></td>
-                                            <td><?php echo $class['teacher_count']; ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($class['created_at'])); ?></td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn-icon btn-edit"
-                                                        onclick="editClass(<?php echo $class['id']; ?>)" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn-icon btn-delete"
-                                                        onclick="deleteClass(<?php echo $class['id']; ?>)" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Class Name</th>
+                                    <th>Description</th>
+                                    <th>Students</th>
+                                    <th>Teachers</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($classes as $class): ?>
+                                <tr>
+                                    <td><?php echo $class['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($class['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($class['description'] ?: 'No description'); ?></td>
+                                    <td><?php echo $class['student_count']; ?></td>
+                                    <td><?php echo $class['teacher_count']; ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($class['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-edit"
+                                                onclick="editClass(<?php echo $class['id']; ?>)" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon btn-delete"
+                                                onclick="deleteClass(<?php echo $class['id']; ?>)" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -363,280 +363,274 @@ $classes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
-    <!-- Enhanced Modal Padding Styles -->
-    <style>
-        /* Enhanced Modal Padding */
-        .modal-content {
-            padding: 0 !important;
-        }
 
+    <style>
+    .modal-content {
+        padding: 0 !important;
+    }
+
+    .modal-header {
+        padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+    }
+
+    .modal-body {
+        padding: 0 2.5rem 2.5rem 2.5rem !important;
+    }
+
+    .form-group {
+        margin-bottom: 2rem !important;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .form-actions {
+        margin-top: 2.5rem !important;
+        padding-top: 2rem !important;
+        border-top: 2px solid #e5e7eb !important;
+    }
+
+    .form-group label {
+        margin-bottom: 0.75rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        color: #374151 !important;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        border-radius: 10px !important;
+        border: 2px solid #e5e7eb !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+        outline: none !important;
+    }
+
+    .form-group textarea {
+        resize: vertical !important;
+        min-height: 120px !important;
+    }
+
+
+    .form-actions .btn {
+        padding: 1rem 2rem !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        border-radius: 10px !important;
+        min-width: 140px !important;
+    }
+
+
+    @media (max-width: 768px) {
         .modal-header {
-            padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+            padding: 1.5rem 2rem 1rem 2rem !important;
         }
 
         .modal-body {
-            padding: 0 2.5rem 2.5rem 2.5rem !important;
+            padding: 0 2rem 2rem 2rem !important;
         }
 
         .form-group {
-            margin-bottom: 2rem !important;
-        }
-
-        .form-group:last-child {
             margin-bottom: 1.5rem !important;
         }
 
         .form-actions {
-            margin-top: 2.5rem !important;
-            padding-top: 2rem !important;
-            border-top: 2px solid #e5e7eb !important;
+            margin-top: 2rem !important;
+            padding-top: 1.5rem !important;
         }
 
-        /* Enhanced form styling */
-        .form-group label {
-            margin-bottom: 0.75rem !important;
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-            color: #374151 !important;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 1rem !important;
-            font-size: 1rem !important;
-            border-radius: 10px !important;
-            border: 2px solid #e5e7eb !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
-            outline: none !important;
-        }
-
-        .form-group textarea {
-            resize: vertical !important;
-            min-height: 120px !important;
-        }
-
-        /* Enhanced button styling */
         .form-actions .btn {
-            padding: 1rem 2rem !important;
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            border-radius: 10px !important;
-            min-width: 140px !important;
+            padding: 0.875rem 1.5rem !important;
+            min-width: 120px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .modal-header {
+            padding: 1rem 1.5rem 0.75rem 1.5rem !important;
         }
 
-        /* Responsive padding adjustments */
-        @media (max-width: 768px) {
-            .modal-header {
-                padding: 1.5rem 2rem 1rem 2rem !important;
-            }
-
-            .modal-body {
-                padding: 0 2rem 2rem 2rem !important;
-            }
-
-            .form-group {
-                margin-bottom: 1.5rem !important;
-            }
-
-            .form-actions {
-                margin-top: 2rem !important;
-                padding-top: 1.5rem !important;
-            }
-
-            .form-actions .btn {
-                padding: 0.875rem 1.5rem !important;
-                min-width: 120px !important;
-            }
+        .modal-body {
+            padding: 0 1.5rem 1.5rem 1.5rem !important;
         }
 
-        @media (max-width: 480px) {
-            .modal-header {
-                padding: 1rem 1.5rem 0.75rem 1.5rem !important;
-            }
-
-            .modal-body {
-                padding: 0 1.5rem 1.5rem 1.5rem !important;
-            }
-
-            .form-group {
-                margin-bottom: 1.25rem !important;
-            }
-
-            .form-actions {
-                margin-top: 1.5rem !important;
-                padding-top: 1.25rem !important;
-                flex-direction: column !important;
-                gap: 1rem !important;
-            }
-
-            .form-actions .btn {
-                width: 100% !important;
-                padding: 1rem !important;
-                min-width: auto !important;
-            }
+        .form-group {
+            margin-bottom: 1.25rem !important;
         }
+
+        .form-actions {
+            margin-top: 1.5rem !important;
+            padding-top: 1.25rem !important;
+            flex-direction: column !important;
+            gap: 1rem !important;
+        }
+
+        .form-actions .btn {
+            width: 100% !important;
+            padding: 1rem !important;
+            min-width: auto !important;
+        }
+    }
     </style>
 
     <script src="../assets/js/responsive-modal.js"></script>
     <script>
-        // Initialize responsive modal
-        let classModal;
+    let classModal;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            classModal = new ResponsiveModal('classModal');
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        classModal = new ResponsiveModal('classModal');
+    });
 
-        function openCreateModal() {
-            // Reset form first
-            const form = document.getElementById('classForm');
-            if (form) form.reset();
+    function openCreateModal() {
 
-            // Set modal title and action
-            const modalTitle = document.getElementById('modalTitle');
-            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-school"></i> Add New Class';
+        const form = document.getElementById('classForm');
+        if (form) form.reset();
 
-            const formAction = document.getElementById('formAction');
-            if (formAction) formAction.value = 'create';
+        const modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-school"></i> Add New Class';
 
-            const submitBtn = document.getElementById('submitBtn');
-            if (submitBtn) submitBtn.textContent = 'Create Class';
+        const formAction = document.getElementById('formAction');
+        if (formAction) formAction.value = 'create';
 
-            // Clear class ID for new class
-            const classId = document.getElementById('classId');
-            if (classId) classId.value = '';
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) submitBtn.textContent = 'Create Class';
 
-            // Open modal using responsive modal system
-            if (classModal) {
-                classModal.open();
-            }
+
+        const classId = document.getElementById('classId');
+        if (classId) classId.value = '';
+
+        if (classModal) {
+            classModal.open();
         }
+    }
 
-        function editClass(classId) {
+    function editClass(classId) {
 
+        fetch('manage_class.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'action=get&id=' + classId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('modalTitle').textContent = 'Edit Class';
+                    document.getElementById('formAction').value = 'update';
+                    document.getElementById('submitBtn').textContent = 'Update Class';
+
+                    document.getElementById('classId').value = data.class.id;
+                    document.getElementById('className').value = data.class.name;
+                    document.getElementById('classDescription').value = data.class.description || '';
+
+                    if (classModal) {
+                        classModal.open();
+                    }
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching class data');
+            });
+    }
+
+    function deleteClass(classId) {
+        if (confirm('Are you sure you want to delete this class? This action cannot be undone.')) {
             fetch('manage_class.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=get&id=' + classId
+                    body: 'action=delete&id=' + classId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('modalTitle').textContent = 'Edit Class';
-                        document.getElementById('formAction').value = 'update';
-                        document.getElementById('submitBtn').textContent = 'Update Class';
-
-                        document.getElementById('classId').value = data.class.id;
-                        document.getElementById('className').value = data.class.name;
-                        document.getElementById('classDescription').value = data.class.description || '';
-
-                        if (classModal) {
-                            classModal.open();
-                        }
+                        alert(data.message);
+                        location.reload();
                     } else {
                         alert('Error: ' + data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while fetching class data');
+                    alert('An error occurred while deleting the class');
                 });
         }
+    }
 
-        function deleteClass(classId) {
-            if (confirm('Are you sure you want to delete this class? This action cannot be undone.')) {
-                fetch('manage_class.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: 'action=delete&id=' + classId
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the class');
-                    });
-            }
+    function closeModal() {
+        if (classModal) {
+            classModal.close();
         }
+    }
 
-        function closeModal() {
-            if (classModal) {
-                classModal.close();
-            }
-        }
+    document.getElementById('classForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
-        // Enhanced form submission
-        document.getElementById('classForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
 
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
 
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            submitBtn.disabled = true;
-
-            fetch('manage_class.php', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok: ' + response.status);
+        fetch('manage_class.php', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.text().then(text => {
+                    console.log('Response text:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        throw new Error('Invalid JSON response: ' + text);
                     }
-                    return response.text().then(text => {
-                        console.log('Response text:', text);
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            console.error('JSON parse error:', e);
-                            throw new Error('Invalid JSON response: ' + text);
-                        }
-                    });
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert('✓ ' + data.message);
-                        closeModal();
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        alert('✗ Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('✗ An error occurred while processing the request');
-                })
-                .finally(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
                 });
-        });
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('✓ ' + data.message);
+                    closeModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    alert('✗ Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('✗ An error occurred while processing the request');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    });
     </script>
 </body>
 

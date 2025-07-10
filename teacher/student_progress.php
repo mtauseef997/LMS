@@ -15,7 +15,7 @@ if ($student_id <= 0) {
     exit;
 }
 
-// Get student information
+
 $student_query = "SELECT * FROM users WHERE id = ? AND role = 'student'";
 $student_stmt = $conn->prepare($student_query);
 $student_stmt->bind_param("i", $student_id);
@@ -27,7 +27,7 @@ if (!$student) {
     exit;
 }
 
-// Get progress data for charts
+
 $progress_query = "SELECT 
     DATE(qs.submitted_at) as date,
     AVG(qs.percentage) as avg_score,
@@ -58,7 +58,7 @@ $progress_stmt->bind_param("iiii", $student_id, $teacher_id, $student_id, $teach
 $progress_stmt->execute();
 $progress_data = $progress_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Get subject-wise performance
+
 $subject_performance_query = "SELECT 
     s.name as subject_name,
     AVG(qs.percentage) as quiz_avg,
@@ -94,174 +94,175 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <title><?php echo htmlspecialchars($student['name']); ?> - Progress Report</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .progress-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 16px;
-            margin-bottom: 2rem;
-        }
+    .progress-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+    }
 
-        .progress-header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
+    .progress-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
 
+    .progress-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .progress-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    .subject-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .subject-item {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+    }
+
+    .subject-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .subject-name {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 1.1rem;
+    }
+
+    .subject-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .stat-group {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: width 0.3s ease;
+    }
+
+    .insights-card {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .insight-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .insight-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .insight-positive {
+        background: #16a34a;
+    }
+
+    .insight-warning {
+        background: #f59e0b;
+    }
+
+    .insight-info {
+        background: #3b82f6;
+    }
+
+    @media (max-width: 768px) {
         .progress-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .progress-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .subject-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .subject-item {
-            background: #f8fafc;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-        }
-
-        .subject-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .subject-name {
-            font-weight: 600;
-            color: #1f2937;
-            font-size: 1.1rem;
+            grid-template-columns: 1fr;
         }
 
         .subject-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            grid-template-columns: 1fr;
         }
-
-        .stat-group {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            color: #6b7280;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s ease;
-        }
-
-        .insights-card {
-            grid-column: 1 / -1;
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .insight-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        .insight-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .insight-positive {
-            background: #16a34a;
-        }
-
-        .insight-warning {
-            background: #f59e0b;
-        }
-
-        .insight-info {
-            background: #3b82f6;
-        }
-
-        @media (max-width: 768px) {
-            .progress-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .subject-stats {
-                grid-template-columns: 1fr;
-            }
-        }
+    }
     </style>
 </head>
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
@@ -299,9 +300,9 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </aside>
 
-        <!-- Main Content -->
+
         <main class="main-content">
-            <!-- Back Button -->
+            0
             <div style="margin-bottom: 1rem;">
                 <a href="view_students.php" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Students
@@ -314,15 +315,15 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </a>
             </div>
 
-            <!-- Header -->
+
             <div class="progress-header">
-                <h1><i class="fas fa-chart-line"></i> Progress Report for <?php echo htmlspecialchars($student['name']); ?></h1>
+                <h1><i class="fas fa-chart-line"></i> Progress Report for
+                    <?php echo htmlspecialchars($student['name']); ?></h1>
                 <p>Detailed academic progress analysis and insights</p>
             </div>
 
-            <!-- Progress Grid -->
             <div class="progress-grid">
-                <!-- Performance Chart -->
+
                 <div class="progress-card">
                     <div class="card-header">
                         <i class="fas fa-chart-line"></i>
@@ -333,7 +334,6 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
 
-                <!-- Subject Performance -->
                 <div class="progress-card">
                     <div class="card-header">
                         <i class="fas fa-book"></i>
@@ -341,42 +341,46 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </div>
                     <div class="subject-list">
                         <?php if (empty($subject_performance)): ?>
-                            <p style="color: #6b7280; text-align: center; padding: 2rem;">No performance data available</p>
+                        <p style="color: #6b7280; text-align: center; padding: 2rem;">No performance data available</p>
                         <?php else: ?>
-                            <?php foreach ($subject_performance as $subject): ?>
-                                <?php
+                        <?php foreach ($subject_performance as $subject): ?>
+                        <?php
                                 $quiz_avg = $subject['quiz_avg'] ?? 0;
                                 $assignment_avg = $subject['assignment_avg'] ?? 0;
                                 $overall_avg = ($quiz_avg + $assignment_avg) / 2;
                                 ?>
-                                <div class="subject-item">
-                                    <div class="subject-header">
-                                        <div class="subject-name"><?php echo htmlspecialchars($subject['subject_name']); ?></div>
-                                    </div>
-                                    <div class="subject-stats">
-                                        <div class="stat-group">
-                                            <div class="stat-value" style="color: <?php echo $quiz_avg >= 80 ? '#16a34a' : ($quiz_avg >= 60 ? '#f59e0b' : '#dc2626'); ?>">
-                                                <?php echo number_format($quiz_avg, 1); ?>%
-                                            </div>
-                                            <div class="stat-label">Quiz Average (<?php echo $subject['quiz_count']; ?>)</div>
-                                        </div>
-                                        <div class="stat-group">
-                                            <div class="stat-value" style="color: <?php echo $assignment_avg >= 80 ? '#16a34a' : ($assignment_avg >= 60 ? '#f59e0b' : '#dc2626'); ?>">
-                                                <?php echo number_format($assignment_avg, 1); ?>%
-                                            </div>
-                                            <div class="stat-label">Assignment Average (<?php echo $subject['assignment_count']; ?>)</div>
-                                        </div>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: <?php echo min($overall_avg, 100); ?>%"></div>
-                                    </div>
+                        <div class="subject-item">
+                            <div class="subject-header">
+                                <div class="subject-name"><?php echo htmlspecialchars($subject['subject_name']); ?>
                                 </div>
-                            <?php endforeach; ?>
+                            </div>
+                            <div class="subject-stats">
+                                <div class="stat-group">
+                                    <div class="stat-value"
+                                        style="color: <?php echo $quiz_avg >= 80 ? '#16a34a' : ($quiz_avg >= 60 ? '#f59e0b' : '#dc2626'); ?>">
+                                        <?php echo number_format($quiz_avg, 1); ?>%
+                                    </div>
+                                    <div class="stat-label">Quiz Average (<?php echo $subject['quiz_count']; ?>)</div>
+                                </div>
+                                <div class="stat-group">
+                                    <div class="stat-value"
+                                        style="color: <?php echo $assignment_avg >= 80 ? '#16a34a' : ($assignment_avg >= 60 ? '#f59e0b' : '#dc2626'); ?>">
+                                        <?php echo number_format($assignment_avg, 1); ?>%
+                                    </div>
+                                    <div class="stat-label">Assignment Average
+                                        (<?php echo $subject['assignment_count']; ?>)</div>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: <?php echo min($overall_avg, 100); ?>%"></div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
                 </div>
 
-                <!-- Insights -->
+
                 <div class="insights-card">
                     <div class="card-header">
                         <i class="fas fa-lightbulb"></i>
@@ -386,7 +390,6 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <?php
                     $insights = [];
 
-                    // Calculate overall performance
                     $total_quiz_avg = 0;
                     $total_assignment_avg = 0;
                     $subject_count = 0;
@@ -426,12 +429,13 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     ?>
 
                     <?php foreach ($insights as $insight): ?>
-                        <div class="insight-item">
-                            <div class="insight-icon insight-<?php echo $insight['type']; ?>">
-                                <i class="fas fa-<?php echo $insight['type'] === 'positive' ? 'check' : ($insight['type'] === 'warning' ? 'exclamation' : 'info'); ?>"></i>
-                            </div>
-                            <div><?php echo $insight['text']; ?></div>
+                    <div class="insight-item">
+                        <div class="insight-icon insight-<?php echo $insight['type']; ?>">
+                            <i
+                                class="fas fa-<?php echo $insight['type'] === 'positive' ? 'check' : ($insight['type'] === 'warning' ? 'exclamation' : 'info'); ?>"></i>
                         </div>
+                        <div><?php echo $insight['text']; ?></div>
+                    </div>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -439,71 +443,70 @@ $subject_performance = $subject_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-        // Performance Chart
-        const ctx = document.getElementById('performanceChart').getContext('2d');
+    const ctx = document.getElementById('performanceChart').getContext('2d');
 
-        // Prepare chart data
-        const progressData = <?php echo json_encode($progress_data); ?>;
-        const dates = [...new Set(progressData.map(item => item.date))].sort().slice(-10);
 
-        const quizData = dates.map(date => {
-            const item = progressData.find(p => p.date === date && p.type === 'quiz');
-            return item ? parseFloat(item.avg_score) : null;
-        });
+    const progressData = <?php echo json_encode($progress_data); ?>;
+    const dates = [...new Set(progressData.map(item => item.date))].sort().slice(-10);
 
-        const assignmentData = dates.map(date => {
-            const item = progressData.find(p => p.date === date && p.type === 'assignment');
-            return item ? parseFloat(item.avg_score) : null;
-        });
+    const quizData = dates.map(date => {
+        const item = progressData.find(p => p.date === date && p.type === 'quiz');
+        return item ? parseFloat(item.avg_score) : null;
+    });
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates.map(date => new Date(date).toLocaleDateString()),
-                datasets: [{
-                    label: 'Quiz Performance',
-                    data: quizData,
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    tension: 0.4,
-                    fill: false
-                }, {
-                    label: 'Assignment Performance',
-                    data: assignmentData,
-                    borderColor: '#764ba2',
-                    backgroundColor: 'rgba(118, 75, 162, 0.1)',
-                    tension: 0.4,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
-                            }
+    const assignmentData = dates.map(date => {
+        const item = progressData.find(p => p.date === date && p.type === 'assignment');
+        return item ? parseFloat(item.avg_score) : null;
+    });
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates.map(date => new Date(date).toLocaleDateString()),
+            datasets: [{
+                label: 'Quiz Performance',
+                data: quizData,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: false
+            }, {
+                label: 'Assignment Performance',
+                data: assignmentData,
+                borderColor: '#764ba2',
+                backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
                         }
                     }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
                 },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
-                            }
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
                         }
                     }
                 }
             }
-        });
+        }
+    });
     </script>
 </body>
 

@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
     }
 }
 
-// Check if required columns exist
+
 $columns_check = $conn->query("SHOW COLUMNS FROM quiz_questions");
 $existing_columns = [];
 if ($columns_check) {
@@ -116,7 +116,7 @@ $has_question_order = in_array('question_order', $existing_columns);
 $has_marks = in_array('marks', $existing_columns);
 $has_explanation = in_array('explanation', $existing_columns);
 
-// If critical columns are missing, redirect to fix script
+
 if (!$has_marks) {
     echo "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; margin: 1rem; border-radius: 5px;'>";
     echo "<h3>⚠️ Database Schema Issue</h3>";
@@ -126,7 +126,7 @@ if (!$has_marks) {
     exit;
 }
 
-// Use appropriate ORDER BY clause based on column availability
+
 if ($has_question_order) {
     $questions_query = "SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY question_order, id";
 } else {
@@ -215,63 +215,63 @@ $questions = $questions_result->fetch_all(MYSQLI_ASSOC);
                 </div>
                 <div class="card-content">
                     <?php if (empty($questions)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No questions added yet. Click "Add Question" to get started.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No questions added yet. Click "Add Question" to get started.
+                    </p>
                     <?php else: ?>
-                        <div class="questions-list">
-                            <?php foreach ($questions as $index => $question): ?>
-                                <div class="question-item"
-                                    style="background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid #667eea;">
-                                    <div
-                                        style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
-                                        <div style="flex: 1;">
-                                            <h4 style="margin: 0 0 0.5rem 0; color: #333;">Question <?php echo $index + 1; ?>
-                                            </h4>
-                                            <span
-                                                class="badge badge-primary"><?php echo ucfirst(str_replace('_', ' ', $question['question_type'])); ?></span>
-                                            <span class="badge badge-secondary"><?php echo $question['marks']; ?> marks</span>
-                                        </div>
-                                        <button class="btn-icon btn-delete"
-                                            onclick="deleteQuestion(<?php echo $question['id']; ?>)" title="Delete Question">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
+                    <div class="questions-list">
+                        <?php foreach ($questions as $index => $question): ?>
+                        <div class="question-item"
+                            style="background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid #667eea;">
+                            <div
+                                style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0 0 0.5rem 0; color: #333;">Question <?php echo $index + 1; ?>
+                                    </h4>
+                                    <span
+                                        class="badge badge-primary"><?php echo ucfirst(str_replace('_', ' ', $question['question_type'])); ?></span>
+                                    <span class="badge badge-secondary"><?php echo $question['marks']; ?> marks</span>
+                                </div>
+                                <button class="btn-icon btn-delete"
+                                    onclick="deleteQuestion(<?php echo $question['id']; ?>)" title="Delete Question">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
 
-                                    <p style="font-weight: 500; margin-bottom: 1rem; color: #333;">
-                                        <?php echo htmlspecialchars($question['question_text']); ?>
-                                    </p>
+                            <p style="font-weight: 500; margin-bottom: 1rem; color: #333;">
+                                <?php echo htmlspecialchars($question['question_text']); ?>
+                            </p>
 
-                                    <?php if ($question['question_type'] === 'multiple_choice' && !empty($question['options'])): ?>
-                                        <div style="margin-bottom: 1rem;">
-                                            <strong>Options:</strong>
-                                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-                                                <?php
+                            <?php if ($question['question_type'] === 'multiple_choice' && !empty($question['options'])): ?>
+                            <div style="margin-bottom: 1rem;">
+                                <strong>Options:</strong>
+                                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                    <?php
                                                 $options = json_decode($question['options'], true);
                                                 foreach ($options as $option):
                                                 ?>
-                                                    <li style="margin-bottom: 0.25rem;"><?php echo htmlspecialchars($option); ?></li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-                                    <?php endif; ?>
+                                    <li style="margin-bottom: 0.25rem;"><?php echo htmlspecialchars($option); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                            <?php endif; ?>
 
-                                    <div style="margin-bottom: 1rem;">
-                                        <strong>Correct Answer:</strong>
-                                        <span
-                                            style="color: #10b981; font-weight: 500;"><?php echo htmlspecialchars($question['correct_answer']); ?></span>
-                                    </div>
+                            <div style="margin-bottom: 1rem;">
+                                <strong>Correct Answer:</strong>
+                                <span
+                                    style="color: #10b981; font-weight: 500;"><?php echo htmlspecialchars($question['correct_answer']); ?></span>
+                            </div>
 
-                                    <?php if (!empty($question['explanation'])): ?>
-                                        <div>
-                                            <strong>Explanation:</strong>
-                                            <p style="margin: 0.5rem 0; color: #555;">
-                                                <?php echo htmlspecialchars($question['explanation']); ?></p>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endforeach; ?>
+                            <?php if (!empty($question['explanation'])): ?>
+                            <div>
+                                <strong>Explanation:</strong>
+                                <p style="margin: 0.5rem 0; color: #555;">
+                                    <?php echo htmlspecialchars($question['explanation']); ?></p>
+                            </div>
+                            <?php endif; ?>
                         </div>
+                        <?php endforeach; ?>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -341,70 +341,36 @@ $questions = $questions_result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-        function openAddModal() {
-            document.getElementById('questionForm').reset();
-            document.getElementById('addQuestionModal').style.display = 'block';
-            toggleOptions();
-        }
+    function openAddModal() {
+        document.getElementById('questionForm').reset();
+        document.getElementById('addQuestionModal').style.display = 'block';
+        toggleOptions();
+    }
 
-        function closeModal() {
-            document.getElementById('addQuestionModal').style.display = 'none';
-        }
+    function closeModal() {
+        document.getElementById('addQuestionModal').style.display = 'none';
+    }
 
-        function toggleOptions() {
-            const questionType = document.getElementById('questionType').value;
-            const optionsSection = document.getElementById('optionsSection');
-            optionsSection.style.display = questionType === 'multiple_choice' ? 'block' : 'none';
-        }
+    function toggleOptions() {
+        const questionType = document.getElementById('questionType').value;
+        const optionsSection = document.getElementById('optionsSection');
+        optionsSection.style.display = questionType === 'multiple_choice' ? 'block' : 'none';
+    }
 
-        function deleteQuestion(questionId) {
-            if (confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
-                fetch('quiz_questions.php?quiz_id=<?php echo $quiz_id; ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: 'action=delete_question&question_id=' + questionId
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the question');
-                    });
-            }
-        }
-
-        document.getElementById('questionForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-
-            submitBtn.textContent = 'Adding...';
-            submitBtn.disabled = true;
-
+    function deleteQuestion(questionId) {
+        if (confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
             fetch('quiz_questions.php?quiz_id=<?php echo $quiz_id; ?>', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: formData
+                    body: 'action=delete_question&question_id=' + questionId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert(data.message);
-                        closeModal();
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);
@@ -412,20 +378,54 @@ $questions = $questions_result->fetch_all(MYSQLI_ASSOC);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while adding the question');
-                })
-                .finally(() => {
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                    alert('An error occurred while deleting the question');
                 });
-        });
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('addQuestionModal');
-            if (event.target === modal) {
-                closeModal();
-            }
         }
+    }
+
+    document.getElementById('questionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.textContent = 'Adding...';
+        submitBtn.disabled = true;
+
+        fetch('quiz_questions.php?quiz_id=<?php echo $quiz_id; ?>', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the question');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+    });
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('addQuestionModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
     </script>
 </body>
 

@@ -54,9 +54,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
 
                 $insert_query = "INSERT INTO quizzes (title, description, subject_id, class_id, teacher_id, time_limit, total_marks)
-                               VALUES (?, ?, ?, ?, ?, ?, ?)";
+                 VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $insert_stmt = $conn->prepare($insert_query);
-                $insert_stmt->bind_param("ssiiiiii", $title, $description, $subject_id, $class_id, $teacher_id, $time_limit, $total_marks);
+                $insert_stmt->bind_param("ssiiiii", $title, $description, $subject_id, $class_id, $teacher_id, $time_limit, $total_marks);
+
+
 
                 if ($insert_stmt->execute()) {
                     $quiz_id = $conn->insert_id;
@@ -69,10 +71,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } catch (Exception $e) {
 
                 try {
-                    $insert_query = "INSERT INTO quizzes (title, subject_id, class_id, teacher_id, total_marks)
-                                   VALUES (?, ?, ?, ?, ?)";
+                    $insert_query = "INSERT INTO quizzes (title, description, subject_id, class_id, teacher_id, time_limit, total_marks)
+               VALUES (?, ?, ?, ?, ?, ?, ?)";
                     $insert_stmt = $conn->prepare($insert_query);
-                    $insert_stmt->bind_param("siiii", $title, $subject_id, $class_id, $teacher_id, $total_marks);
+                    $insert_stmt->bind_param("ssiiiiii", $title, $description, $subject_id, $class_id, $teacher_id, $time_limit, $total_marks);
+
 
                     if ($insert_stmt->execute()) {
                         $quiz_id = $conn->insert_id;
@@ -100,7 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Create Quiz - Teacher Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
@@ -159,17 +163,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="content-body">
                 <?php if ($message): ?>
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i>
-                        <?php echo $message; ?>
-                    </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <?php echo $message; ?>
+                </div>
                 <?php endif; ?>
 
                 <?php if ($error): ?>
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <?php echo $error; ?>
-                    </div>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <?php echo $error; ?>
+                </div>
                 <?php endif; ?>
 
                 <div class="form-container">
@@ -193,10 +197,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <select id="subject_id" name="subject_id" required>
                                     <option value="">Select Subject</option>
                                     <?php foreach ($subjects as $subject): ?>
-                                        <option value="<?php echo $subject['id']; ?>"
-                                            <?php echo (($_POST['subject_id'] ?? '') == $subject['id']) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($subject['name']); ?>
-                                        </option>
+                                    <option value="<?php echo $subject['id']; ?>"
+                                        <?php echo (($_POST['subject_id'] ?? '') == $subject['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($subject['name']); ?>
+                                    </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -206,10 +210,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <select id="class_id" name="class_id" required>
                                     <option value="">Select Class</option>
                                     <?php foreach ($classes as $class): ?>
-                                        <option value="<?php echo $class['id']; ?>"
-                                            <?php echo (($_POST['class_id'] ?? '') == $class['id']) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($class['name']); ?>
-                                        </option>
+                                    <option value="<?php echo $class['id']; ?>"
+                                        <?php echo (($_POST['class_id'] ?? '') == $class['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($class['name']); ?>
+                                    </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -219,15 +223,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-group">
                                 <label for="time_limit">Time Limit (minutes)</label>
                                 <input type="number" id="time_limit" name="time_limit" min="1" max="300"
-                                    value="<?php echo $_POST['time_limit'] ?? '30'; ?>"
-                                    placeholder="30">
+                                    value="<?php echo $_POST['time_limit'] ?? '30'; ?>" placeholder="30">
                             </div>
 
                             <div class="form-group">
                                 <label for="total_marks">Total Marks *</label>
                                 <input type="number" id="total_marks" name="total_marks" min="1" required
-                                    value="<?php echo $_POST['total_marks'] ?? ''; ?>"
-                                    placeholder="Enter total marks">
+                                    value="<?php echo $_POST['total_marks'] ?? ''; ?>" placeholder="Enter total marks">
                             </div>
                         </div>
 

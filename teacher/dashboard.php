@@ -66,7 +66,7 @@ $stats['total_classes'] = count($teacher_assignments);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
 
@@ -189,7 +189,6 @@ $stats['total_classes'] = count($teacher_assignments);
                                         <tr>
                                             <th>Class</th>
                                             <th>Subject</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -197,13 +196,6 @@ $stats['total_classes'] = count($teacher_assignments);
                                             <tr>
                                                 <td><?php echo htmlspecialchars($assignment['class_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($assignment['subject_name']); ?></td>
-                                                <td>
-                                                    <a href="class_details.php?id=<?php echo $assignment['assignment_id']; ?>"
-                                                        class="btn btn-primary"
-                                                        style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">
-                                                        View Details
-                                                    </a>
-                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>

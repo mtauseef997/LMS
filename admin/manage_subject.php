@@ -7,7 +7,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     exit;
 }
 
-// Simple audit logging function
 function logAdminAction($conn, $user_id, $action, $details)
 {
     try {
@@ -16,7 +15,7 @@ function logAdminAction($conn, $user_id, $action, $details)
         $stmt->bind_param("iss", $user_id, $action, $details);
         $stmt->execute();
     } catch (Exception $e) {
-        // If admin_logs table doesn't exist, create it
+
         try {
             $create_table = "CREATE TABLE IF NOT EXISTS admin_logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -29,12 +28,11 @@ function logAdminAction($conn, $user_id, $action, $details)
             )";
             $conn->query($create_table);
 
-            // Try logging again
+
             $stmt = $conn->prepare($query);
             $stmt->bind_param("iss", $user_id, $action, $details);
             $stmt->execute();
         } catch (Exception $e2) {
-            // Silently fail if we can't create the table
         }
     }
 }
@@ -49,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
 
-            // Enhanced validation
             if (empty($name)) {
                 echo json_encode(['success' => false, 'message' => 'Subject name is required']);
                 exit;
@@ -75,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Check for duplicate names (case-insensitive)
+
             $query = "SELECT id FROM subjects WHERE LOWER(name) = LOWER(?)";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("s", $name);
@@ -103,7 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
 
-            // Enhanced validation
             if ($id <= 0) {
                 echo json_encode(['success' => false, 'message' => 'Invalid subject ID']);
                 exit;
@@ -134,7 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Check if subject exists
             $query = "SELECT id FROM subjects WHERE id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
@@ -144,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Check for duplicate names (case-insensitive, excluding current record)
+
             $query = "SELECT id FROM subjects WHERE LOWER(name) = LOWER(?) AND id != ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("si", $name, $id);
@@ -177,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 exit;
             }
 
-            // Check if subject exists and get name
+
             $query = "SELECT name FROM subjects WHERE id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
@@ -189,14 +184,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
             }
             $subject_name = $result->fetch_assoc()['name'];
 
-            // Check for dependencies - teacher assignments
+
             $query = "SELECT COUNT(*) as count FROM teacher_subject_class WHERE subject_id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $id);
             $stmt->execute();
             $teacher_count = $stmt->get_result()->fetch_assoc()['count'];
 
-            // Check for dependencies - quizzes
+
             $quiz_count = 0;
             try {
                 $query = "SELECT COUNT(*) as count FROM quizzes WHERE subject_id = ?";
@@ -205,7 +200,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
                 $stmt->execute();
                 $quiz_count = $stmt->get_result()->fetch_assoc()['count'];
             } catch (Exception $e) {
-                // Quizzes table might not have subject_id column
             }
 
             if ($teacher_count > 0 || $quiz_count > 0) {
@@ -366,7 +360,7 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </header>
 
             <div class="content-body">
-                <!-- Enhanced Statistics Cards -->
+
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -411,7 +405,7 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
 
 
-                <!-- Enhanced Search Section -->
+
                 <div class="content-card">
                     <div class="card-header">
                         <h3><i class="fas fa-search"></i> Search & Filter</h3>
@@ -449,7 +443,7 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
 
 
-                <!-- Enhanced Subjects Table -->
+
                 <div class="content-card">
                     <div class="card-header">
                         <h3><i class="fas fa-list"></i> Subjects Management</h3>
@@ -457,83 +451,92 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <div class="header-actions">
                             <div class="search-box">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="searchSubjects" placeholder="Quick search..." onkeyup="filterSubjects()">
+                                <input type="text" id="searchSubjects" placeholder="Quick search..."
+                                    onkeyup="filterSubjects()">
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <?php if (empty($subjects)): ?>
-                            <div class="empty-state">
-                                <i class="fas fa-book"></i>
-                                <h3>No Subjects Found</h3>
-                                <p>No subjects found matching your criteria. Create your first subject to get started.</p>
-                                <button onclick="openCreateModal()" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> Create First Subject
-                                </button>
-                            </div>
+                        <div class="empty-state">
+                            <i class="fas fa-book"></i>
+                            <h3>No Subjects Found</h3>
+                            <p>No subjects found matching your criteria. Create your first subject to get started.</p>
+                            <button onclick="openCreateModal()" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create First Subject
+                            </button>
+                        </div>
                         <?php else: ?>
-                            <div class="table-container">
-                                <table class="data-table" id="subjectsTable">
-                                    <thead>
-                                        <tr>
-                                            <th><i class="fas fa-hashtag"></i> ID</th>
-                                            <th><i class="fas fa-book"></i> Subject Name</th>
-                                            <th><i class="fas fa-info-circle"></i> Description</th>
-                                            <th><i class="fas fa-chalkboard-teacher"></i> Teachers</th>
-                                            <th><i class="fas fa-calendar"></i> Created</th>
-                                            <th><i class="fas fa-cogs"></i> Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($subjects as $subject): ?>
-                                            <tr class="subject-row">
-                                                <td>
-                                                    <span class="subject-id">#<?php echo $subject['id']; ?></span>
-                                                </td>
-                                                <td>
-                                                    <div class="subject-info">
-                                                        <div class="subject-icon">
-                                                            <i class="fas fa-book"></i>
-                                                        </div>
-                                                        <span class="subject-name"><?php echo htmlspecialchars($subject['name']); ?></span>
-                                                    </div>
-                                                </td>
-                                                <td class="subject-description">
-                                                    <?php if (!empty($subject['description'])): ?>
-                                                        <span class="description-text"><?php echo htmlspecialchars($subject['description']); ?></span>
-                                                    <?php else: ?>
-                                                        <span class="no-description">No description</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <span class="teacher-count-badge <?php echo $subject['teacher_count'] > 0 ? 'active' : 'inactive'; ?>">
-                                                        <?php echo $subject['teacher_count']; ?> teacher<?php echo $subject['teacher_count'] != 1 ? 's' : ''; ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="created-date"><?php echo date('M j, Y', strtotime($subject['created_at'])); ?></span>
-                                                </td>
-                                                <td>
-                                                    <div class="action-buttons">
-                                                        <button type="button" onclick="viewSubjectDetails(<?php echo $subject['id']; ?>)"
-                                                            class="btn btn-sm btn-info" title="View Details">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button type="button" onclick="editSubject(<?php echo $subject['id']; ?>)"
-                                                            class="btn btn-sm btn-secondary" title="Edit Subject">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button type="button" onclick="deleteSubject(<?php echo $subject['id']; ?>)"
-                                                            class="btn btn-sm btn-danger" title="Delete Subject">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-container">
+                            <table class="data-table" id="subjectsTable">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-hashtag"></i> ID</th>
+                                        <th><i class="fas fa-book"></i> Subject Name</th>
+                                        <th><i class="fas fa-info-circle"></i> Description</th>
+                                        <th><i class="fas fa-chalkboard-teacher"></i> Teachers</th>
+                                        <th><i class="fas fa-calendar"></i> Created</th>
+                                        <th><i class="fas fa-cogs"></i> Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($subjects as $subject): ?>
+                                    <tr class="subject-row">
+                                        <td>
+                                            <span class="subject-id">#<?php echo $subject['id']; ?></span>
+                                        </td>
+                                        <td>
+                                            <div class="subject-info">
+                                                <div class="subject-icon">
+                                                    <i class="fas fa-book"></i>
+                                                </div>
+                                                <span
+                                                    class="subject-name"><?php echo htmlspecialchars($subject['name']); ?></span>
+                                            </div>
+                                        </td>
+                                        <td class="subject-description">
+                                            <?php if (!empty($subject['description'])): ?>
+                                            <span
+                                                class="description-text"><?php echo htmlspecialchars($subject['description']); ?></span>
+                                            <?php else: ?>
+                                            <span class="no-description">No description</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="teacher-count-badge <?php echo $subject['teacher_count'] > 0 ? 'active' : 'inactive'; ?>">
+                                                <?php echo $subject['teacher_count']; ?>
+                                                teacher<?php echo $subject['teacher_count'] != 1 ? 's' : ''; ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="created-date"><?php echo date('M j, Y', strtotime($subject['created_at'])); ?></span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button type="button"
+                                                    onclick="viewSubjectDetails(<?php echo $subject['id']; ?>)"
+                                                    class="btn btn-sm btn-info" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button type="button"
+                                                    onclick="editSubject(<?php echo $subject['id']; ?>)"
+                                                    class="btn btn-sm btn-secondary" title="Edit Subject">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button"
+                                                    onclick="deleteSubject(<?php echo $subject['id']; ?>)"
+                                                    class="btn btn-sm btn-danger" title="Delete Subject">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -541,7 +544,7 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </main>
     </div>
 
-    <!-- Enhanced Subject Modal -->
+
     <div id="subjectModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -597,608 +600,594 @@ $subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
-    <!-- Enhanced CSS Styles -->
-    <style>
-        /* Enhanced Modal Padding */
-        .modal-content {
-            padding: 0 !important;
-        }
 
+    <style>
+    .modal-content {
+        padding: 0 !important;
+    }
+
+    .modal-header {
+        padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+    }
+
+    .modal-body {
+        padding: 0 2.5rem 2.5rem 2.5rem !important;
+    }
+
+    .form-group {
+        margin-bottom: 2rem !important;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .form-actions {
+        margin-top: 2.5rem !important;
+        padding-top: 2rem !important;
+        border-top: 2px solid #e5e7eb !important;
+    }
+
+
+    .form-group label {
+        margin-bottom: 0.75rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        color: #374151 !important;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        border-radius: 10px !important;
+        border: 2px solid #e5e7eb !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+        outline: none !important;
+    }
+
+    .form-group textarea {
+        resize: vertical !important;
+        min-height: 120px !important;
+    }
+
+
+    .form-actions .btn {
+        padding: 1rem 2rem !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        border-radius: 10px !important;
+        min-width: 140px !important;
+    }
+
+
+    .subject-preview {
+        margin-top: 2rem !important;
+        padding: 1.5rem !important;
+        border-radius: 12px !important;
+    }
+
+
+    @media (max-width: 768px) {
         .modal-header {
-            padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+            padding: 1.5rem 2rem 1rem 2rem !important;
         }
 
         .modal-body {
-            padding: 0 2.5rem 2.5rem 2.5rem !important;
+            padding: 0 2rem 2rem 2rem !important;
         }
 
         .form-group {
-            margin-bottom: 2rem !important;
-        }
-
-        .form-group:last-child {
             margin-bottom: 1.5rem !important;
         }
 
         .form-actions {
-            margin-top: 2.5rem !important;
-            padding-top: 2rem !important;
-            border-top: 2px solid #e5e7eb !important;
-        }
-
-        /* Enhanced form styling */
-        .form-group label {
-            margin-bottom: 0.75rem !important;
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-            color: #374151 !important;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 1rem !important;
-            font-size: 1rem !important;
-            border-radius: 10px !important;
-            border: 2px solid #e5e7eb !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
-            outline: none !important;
-        }
-
-        .form-group textarea {
-            resize: vertical !important;
-            min-height: 120px !important;
-        }
-
-        /* Enhanced button styling */
-        .form-actions .btn {
-            padding: 1rem 2rem !important;
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            border-radius: 10px !important;
-            min-width: 140px !important;
-        }
-
-        /* Subject preview styling */
-        .subject-preview {
             margin-top: 2rem !important;
-            padding: 1.5rem !important;
-            border-radius: 12px !important;
+            padding-top: 1.5rem !important;
         }
 
-        /* Responsive padding adjustments */
-        @media (max-width: 768px) {
-            .modal-header {
-                padding: 1.5rem 2rem 1rem 2rem !important;
-            }
-
-            .modal-body {
-                padding: 0 2rem 2rem 2rem !important;
-            }
-
-            .form-group {
-                margin-bottom: 1.5rem !important;
-            }
-
-            .form-actions {
-                margin-top: 2rem !important;
-                padding-top: 1.5rem !important;
-            }
-
-            .form-actions .btn {
-                padding: 0.875rem 1.5rem !important;
-                min-width: 120px !important;
-            }
-
-            .subject-preview {
-                margin-top: 1.5rem !important;
-                padding: 1.25rem !important;
-            }
+        .form-actions .btn {
+            padding: 0.875rem 1.5rem !important;
+            min-width: 120px !important;
         }
 
-        @media (max-width: 480px) {
-            .modal-header {
-                padding: 1rem 1.5rem 0.75rem 1.5rem !important;
-            }
+        .subject-preview {
+            margin-top: 1.5rem !important;
+            padding: 1.25rem !important;
+        }
+    }
 
-            .modal-body {
-                padding: 0 1.5rem 1.5rem 1.5rem !important;
-            }
-
-            .form-group {
-                margin-bottom: 1.25rem !important;
-            }
-
-            .form-actions {
-                margin-top: 1.5rem !important;
-                padding-top: 1.25rem !important;
-                flex-direction: column !important;
-                gap: 1rem !important;
-            }
-
-            .form-actions .btn {
-                width: 100% !important;
-                padding: 1rem !important;
-                min-width: auto !important;
-            }
-
-            .subject-preview {
-                margin-top: 1.25rem !important;
-                padding: 1rem !important;
-            }
+    @media (max-width: 480px) {
+        .modal-header {
+            padding: 1rem 1.5rem 0.75rem 1.5rem !important;
         }
 
-        /* Enhanced Subject Info */
-        .subject-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        .modal-body {
+            padding: 0 1.5rem 1.5rem 1.5rem !important;
         }
 
-        .subject-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
+        .form-group {
+            margin-bottom: 1.25rem !important;
         }
 
-        .subject-name {
-            font-weight: 600;
-            color: #374151;
+        .form-actions {
+            margin-top: 1.5rem !important;
+            padding-top: 1.25rem !important;
+            flex-direction: column !important;
+            gap: 1rem !important;
         }
 
-        .subject-id {
-            font-family: 'Courier New', monospace;
-            background: #f3f4f6;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-weight: 600;
-            color: #374151;
+        .form-actions .btn {
+            width: 100% !important;
+            padding: 1rem !important;
+            min-width: auto !important;
         }
 
-        /* Enhanced Description */
-        .description-text {
-            color: #374151;
-            line-height: 1.4;
+        .subject-preview {
+            margin-top: 1.25rem !important;
+            padding: 1rem !important;
         }
+    }
 
-        .no-description {
-            color: #9ca3af;
-            font-style: italic;
-        }
 
-        /* Enhanced Teacher Count Badge */
-        .teacher-count-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: inline-block;
-        }
+    .subject-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-        .teacher-count-badge.active {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
+    .subject-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
 
-        .teacher-count-badge.inactive {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            color: #6b7280;
-        }
+    .subject-name {
+        font-weight: 600;
+        color: #374151;
+    }
 
-        .created-date {
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
+    .subject-id {
+        font-family: 'Courier New', monospace;
+        background: #f3f4f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+        color: #374151;
+    }
 
-        /* Enhanced Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
 
-        /* Enhanced Table Styles */
-        .subject-row:hover {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        }
+    .description-text {
+        color: #374151;
+        line-height: 1.4;
+    }
 
-        .table-container {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
+    .no-description {
+        color: #9ca3af;
+        font-style: italic;
+    }
 
-        /* Enhanced Header Actions */
+
+    .teacher-count-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .teacher-count-badge.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .teacher-count-badge.inactive {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        color: #6b7280;
+    }
+
+    .created-date {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .subject-row:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .table-container {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 300px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
+
+    .search-box input {
+        padding-left: 2.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        width: 100%;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .search-box input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .enhanced-search-form {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+    }
+
+    .search-input-wrapper input {
+        padding-left: 2.5rem;
+        width: 100%;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        pointer-events: none;
+    }
+
+    .enhanced-form {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .form-group label i {
+        color: #667eea;
+    }
+
+    .subject-preview {
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        border: 1px solid #a5b4fc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .subject-preview h4 {
+        margin: 0 0 1rem 0;
+        color: #3730a3;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preview-content {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .preview-item {
+        color: #374151;
+    }
+
+    .preview-item strong {
+        color: #1f2937;
+    }
+
+    .card-header p {
+        margin: 0.5rem 0 0 0;
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+
+    @media (max-width: 768px) {
         .header-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            margin-top: 1rem;
+            flex-direction: column;
+            align-items: stretch;
         }
 
         .search-box {
-            position: relative;
-            flex: 1;
-            max-width: 300px;
+            max-width: none;
         }
 
-        .search-box i {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
+        .action-buttons {
+            flex-direction: column;
         }
 
-        .search-box input {
-            padding-left: 2.5rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            width: 100%;
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
-        }
-
-        .search-box input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Enhanced Search Form */
-        .enhanced-search-form {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .search-input-wrapper {
-            position: relative;
-        }
-
-        .search-input-wrapper input {
-            padding-left: 2.5rem;
-            width: 100%;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            pointer-events: none;
-        }
-
-        /* Enhanced Form Styles */
-        .enhanced-form {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .form-group label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .form-group label i {
-            color: #667eea;
-        }
-
-        /* Subject Preview */
-        .subject-preview {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-            border: 1px solid #a5b4fc;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-
-        .subject-preview h4 {
-            margin: 0 0 1rem 0;
-            color: #3730a3;
-            display: flex;
-            align-items: center;
+        .subject-info {
+            flex-direction: column;
+            align-items: flex-start;
             gap: 0.5rem;
         }
-
-        .preview-content {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        .preview-item {
-            color: #374151;
-        }
-
-        .preview-item strong {
-            color: #1f2937;
-        }
-
-        /* Enhanced Card Header */
-        .card-header p {
-            margin: 0.5rem 0 0 0;
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-box {
-                max-width: none;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .subject-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-        }
+    }
     </style>
 
-    <!-- Enhanced JavaScript -->
+
     <script src="../assets/js/responsive-modal.js"></script>
     <script>
-        // Initialize responsive modal
-        let subjectModal;
+    let subjectModal;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            subjectModal = new ResponsiveModal('subjectModal');
+    document.addEventListener('DOMContentLoaded', function() {
+        subjectModal = new ResponsiveModal('subjectModal');
 
-            // Add change listeners for subject preview
-            document.getElementById('subjectName').addEventListener('input', updateSubjectPreview);
-            document.getElementById('subjectDescription').addEventListener('input', updateSubjectPreview);
-        });
 
-        // Enhanced modal functions
-        function openCreateModal() {
-            // Reset form first
-            const form = document.getElementById('subjectForm');
-            if (form) form.reset();
+        document.getElementById('subjectName').addEventListener('input', updateSubjectPreview);
+        document.getElementById('subjectDescription').addEventListener('input', updateSubjectPreview);
+    });
 
-            // Set modal title and action
-            const modalTitle = document.getElementById('modalTitle');
-            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-book-open"></i> Add New Subject';
 
-            const formAction = document.getElementById('formAction');
-            if (formAction) formAction.value = 'create';
+    function openCreateModal() {
 
-            const submitBtn = document.getElementById('submitBtn');
-            if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-book-open"></i> Create Subject';
+        const form = document.getElementById('subjectForm');
+        if (form) form.reset();
 
-            // Clear subject ID for new subject
-            const subjectId = document.getElementById('subjectId');
-            if (subjectId) subjectId.value = '';
+        const modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-book-open"></i> Add New Subject';
 
-            // Hide preview
-            const preview = document.getElementById('subjectPreview');
-            if (preview) preview.style.display = 'none';
+        const formAction = document.getElementById('formAction');
+        if (formAction) formAction.value = 'create';
 
-            // Open modal using responsive modal system
-            if (subjectModal) {
-                subjectModal.open();
-            }
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-book-open"></i> Create Subject';
+
+
+        const subjectId = document.getElementById('subjectId');
+        if (subjectId) subjectId.value = '';
+
+
+        const preview = document.getElementById('subjectPreview');
+        if (preview) preview.style.display = 'none';
+
+        if (subjectModal) {
+            subjectModal.open();
         }
+    }
 
-        function closeModal() {
-            if (subjectModal) {
-                subjectModal.close();
-            }
+    function closeModal() {
+        if (subjectModal) {
+            subjectModal.close();
         }
+    }
 
-        // Enhanced edit function
-        function editSubject(subjectId) {
+
+    function editSubject(subjectId) {
+        fetch('manage_subject.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'action=get&id=' + subjectId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Subject';
+                    document.getElementById('formAction').value = 'update';
+                    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Subject';
+
+                    document.getElementById('subjectId').value = data.subject.id;
+                    document.getElementById('subjectName').value = data.subject.name;
+                    document.getElementById('subjectDescription').value = data.subject.description || '';
+
+                    updateSubjectPreview();
+                    if (subjectModal) {
+                        subjectModal.open();
+                    }
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred while fetching subject data', 'error');
+            });
+    }
+
+
+    function deleteSubject(subjectId) {
+        if (confirm('Are you sure you want to delete this subject? This action cannot be undone.')) {
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+
             fetch('manage_subject.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=get&id=' + subjectId
+                    body: 'action=delete&id=' + subjectId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Subject';
-                        document.getElementById('formAction').value = 'update';
-                        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Subject';
-
-                        document.getElementById('subjectId').value = data.subject.id;
-                        document.getElementById('subjectName').value = data.subject.name;
-                        document.getElementById('subjectDescription').value = data.subject.description || '';
-
-                        updateSubjectPreview();
-                        if (subjectModal) {
-                            subjectModal.open();
-                        }
-                    } else {
-                        showNotification('Error: ' + data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('An error occurred while fetching subject data', 'error');
-                });
-        }
-
-        // Enhanced delete function
-        function deleteSubject(subjectId) {
-            if (confirm('Are you sure you want to delete this subject? This action cannot be undone.')) {
-                const button = event.target.closest('button');
-                const originalContent = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                button.disabled = true;
-
-                fetch('manage_subject.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: 'action=delete&id=' + subjectId
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showNotification(data.message, 'success');
-                            location.reload();
-                        } else {
-                            showNotification('Error: ' + data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('An error occurred while deleting the subject', 'error');
-                    })
-                    .finally(() => {
-                        button.innerHTML = originalContent;
-                        button.disabled = false;
-                    });
-            }
-        }
-
-        // Filter subjects function
-        function filterSubjects() {
-            const searchTerm = document.getElementById('searchSubjects').value.toLowerCase();
-            const rows = document.querySelectorAll('.subject-row');
-
-            rows.forEach(row => {
-                const subjectName = row.querySelector('.subject-name').textContent.toLowerCase();
-                const description = row.querySelector('.subject-description').textContent.toLowerCase();
-
-                const matches = subjectName.includes(searchTerm) || description.includes(searchTerm);
-
-                if (matches) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        // View subject details function
-        function viewSubjectDetails(subjectId) {
-            alert('Subject details view coming soon!');
-        }
-
-        // Export subjects function
-        function exportSubjects() {
-            alert('Export feature coming soon!');
-        }
-
-        // Bulk import modal function
-        function showBulkImportModal() {
-            alert('Bulk import feature coming soon!');
-        }
-
-        // Toggle advanced search function
-        function toggleAdvancedSearch() {
-            alert('Advanced search coming soon!');
-        }
-
-        // Show notification function
-        function showNotification(message, type) {
-            if (type === 'success') {
-                alert('✓ ' + message);
-            } else {
-                alert('✗ ' + message);
-            }
-        }
-
-        // Update subject preview
-        function updateSubjectPreview() {
-            const nameInput = document.getElementById('subjectName');
-            const descriptionInput = document.getElementById('subjectDescription');
-            const preview = document.getElementById('subjectPreview');
-
-            if (nameInput.value.trim()) {
-                document.getElementById('previewName').textContent = nameInput.value.trim();
-                document.getElementById('previewDescription').textContent = descriptionInput.value.trim() || 'No description';
-                preview.style.display = 'block';
-            } else {
-                preview.style.display = 'none';
-            }
-        }
-
-        // Enhanced form submission
-        document.getElementById('subjectForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            submitBtn.disabled = true;
-
-            fetch('manage_subject.php', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok: ' + response.status);
-                    }
-                    return response.text().then(text => {
-                        console.log('Response text:', text);
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            console.error('JSON parse error:', e);
-                            throw new Error('Invalid JSON response: ' + text);
-                        }
-                    });
-                })
-                .then(data => {
-                    if (data.success) {
                         showNotification(data.message, 'success');
-                        closeModal();
-                        setTimeout(() => location.reload(), 1000);
+                        location.reload();
                     } else {
                         showNotification('Error: ' + data.message, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showNotification('An error occurred while processing the request', 'error');
+                    showNotification('An error occurred while deleting the subject', 'error');
                 })
                 .finally(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
                 });
+        }
+    }
+
+
+    function filterSubjects() {
+        const searchTerm = document.getElementById('searchSubjects').value.toLowerCase();
+        const rows = document.querySelectorAll('.subject-row');
+
+        rows.forEach(row => {
+            const subjectName = row.querySelector('.subject-name').textContent.toLowerCase();
+            const description = row.querySelector('.subject-description').textContent.toLowerCase();
+
+            const matches = subjectName.includes(searchTerm) || description.includes(searchTerm);
+
+            if (matches) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
         });
+    }
+
+    function viewSubjectDetails(subjectId) {
+        alert('Subject details view coming soon!');
+    }
+
+
+    function exportSubjects() {
+        alert('Export feature coming soon!');
+    }
+
+
+    function showBulkImportModal() {
+        alert('Bulk import feature coming soon!');
+    }
+
+    function toggleAdvancedSearch() {
+        alert('Advanced search coming soon!');
+    }
+
+    function showNotification(message, type) {
+        if (type === 'success') {
+            alert('✓ ' + message);
+        } else {
+            alert('✗ ' + message);
+        }
+    }
+
+    function updateSubjectPreview() {
+        const nameInput = document.getElementById('subjectName');
+        const descriptionInput = document.getElementById('subjectDescription');
+        const preview = document.getElementById('subjectPreview');
+
+        if (nameInput.value.trim()) {
+            document.getElementById('previewName').textContent = nameInput.value.trim();
+            document.getElementById('previewDescription').textContent = descriptionInput.value.trim() ||
+                'No description';
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    document.getElementById('subjectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+
+        fetch('manage_subject.php', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.text().then(text => {
+                    console.log('Response text:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        throw new Error('Invalid JSON response: ' + text);
+                    }
+                });
+            })
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    closeModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred while processing the request', 'error');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    });
     </script>
 </body>
 

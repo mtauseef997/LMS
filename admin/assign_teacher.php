@@ -200,7 +200,7 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </header>
 
             <div class="content-body">
-                <!-- Enhanced Statistics Cards -->
+
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -240,7 +240,7 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
 
-                <!-- Enhanced Filters Section -->
+
                 <div class="content-card">
                     <div class="card-header">
                         <h3><i class="fas fa-filter"></i> Filter Assignments</h3>
@@ -257,10 +257,10 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <select name="teacher" id="teacher_filter">
                                             <option value="">All Teachers</option>
                                             <?php foreach ($teachers as $teacher): ?>
-                                                <option value="<?php echo $teacher['id']; ?>"
-                                                    <?php echo $teacher_filter == $teacher['id'] ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($teacher['name']); ?>
-                                                </option>
+                                            <option value="<?php echo $teacher['id']; ?>"
+                                                <?php echo $teacher_filter == $teacher['id'] ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($teacher['name']); ?>
+                                            </option>
                                             <?php endforeach; ?>
                                         </select>
                                         <i class="fas fa-chevron-down select-arrow"></i>
@@ -275,10 +275,10 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <select name="subject" id="subject_filter">
                                             <option value="">All Subjects</option>
                                             <?php foreach ($subjects as $subject): ?>
-                                                <option value="<?php echo $subject['id']; ?>"
-                                                    <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($subject['name']); ?>
-                                                </option>
+                                            <option value="<?php echo $subject['id']; ?>"
+                                                <?php echo $subject_filter == $subject['id'] ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($subject['name']); ?>
+                                            </option>
                                             <?php endforeach; ?>
                                         </select>
                                         <i class="fas fa-chevron-down select-arrow"></i>
@@ -293,10 +293,10 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <select name="class" id="class_filter">
                                             <option value="">All Classes</option>
                                             <?php foreach ($classes as $class): ?>
-                                                <option value="<?php echo $class['id']; ?>"
-                                                    <?php echo $class_filter == $class['id'] ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($class['name']); ?>
-                                                </option>
+                                            <option value="<?php echo $class['id']; ?>"
+                                                <?php echo $class_filter == $class['id'] ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($class['name']); ?>
+                                            </option>
                                             <?php endforeach; ?>
                                         </select>
                                         <i class="fas fa-chevron-down select-arrow"></i>
@@ -319,79 +319,89 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
 
-                <!-- Enhanced Assignments Table -->
+
                 <div class="content-card">
                     <div class="card-header">
                         <h3><i class="fas fa-list"></i> Teacher Assignments</h3>
-                        <p>Manage teacher assignments to subjects and classes (<?php echo count($assignments); ?> total)</p>
+                        <p>Manage teacher assignments to subjects and classes (<?php echo count($assignments); ?> total)
+                        </p>
                         <div class="header-actions">
                             <div class="search-box">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="searchAssignments" placeholder="Search assignments..." onkeyup="filterAssignments()">
+                                <input type="text" id="searchAssignments" placeholder="Search assignments..."
+                                    onkeyup="filterAssignments()">
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <?php if (empty($assignments)): ?>
-                            <div class="empty-state">
-                                <i class="fas fa-chalkboard-teacher"></i>
-                                <h3>No Assignments Found</h3>
-                                <p>No teacher assignments found matching your criteria. Create your first assignment to get started.</p>
-                                <button onclick="openAssignModal()" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> Create First Assignment
-                                </button>
-                            </div>
+                        <div class="empty-state">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <h3>No Assignments Found</h3>
+                            <p>No teacher assignments found matching your criteria. Create your first assignment to get
+                                started.</p>
+                            <button onclick="openAssignModal()" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create First Assignment
+                            </button>
+                        </div>
                         <?php else: ?>
-                            <div class="table-container">
-                                <table class="data-table" id="assignmentsTable">
-                                    <thead>
-                                        <tr>
-                                            <th><i class="fas fa-user"></i> Teacher</th>
-                                            <th><i class="fas fa-envelope"></i> Email</th>
-                                            <th><i class="fas fa-book"></i> Subject</th>
-                                            <th><i class="fas fa-school"></i> Class</th>
-                                            <th><i class="fas fa-id-badge"></i> ID</th>
-                                            <th><i class="fas fa-cogs"></i> Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($assignments as $assignment): ?>
-                                            <tr class="assignment-row">
-                                                <td>
-                                                    <div class="teacher-info">
-                                                        <div class="teacher-avatar">
-                                                            <i class="fas fa-user"></i>
-                                                        </div>
-                                                        <span class="teacher-name"><?php echo htmlspecialchars($assignment['teacher_name']); ?></span>
-                                                    </div>
-                                                </td>
-                                                <td class="teacher-email"><?php echo htmlspecialchars($assignment['teacher_email']); ?></td>
-                                                <td>
-                                                    <span class="subject-badge"><?php echo htmlspecialchars($assignment['subject_name']); ?></span>
-                                                </td>
-                                                <td>
-                                                    <span class="class-badge"><?php echo htmlspecialchars($assignment['class_name']); ?></span>
-                                                </td>
-                                                <td>
-                                                    <span class="assignment-id">#<?php echo $assignment['assignment_id']; ?></span>
-                                                </td>
-                                                <td>
-                                                    <div class="action-buttons">
-                                                        <button type="button" onclick="viewAssignmentDetails(<?php echo $assignment['assignment_id']; ?>)"
-                                                            class="btn btn-sm btn-info" title="View Details">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button type="button" onclick="unassignTeacher(<?php echo $assignment['id']; ?>)"
-                                                            class="btn btn-sm btn-danger" title="Unassign Teacher">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-container">
+                            <table class="data-table" id="assignmentsTable">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> Teacher</th>
+                                        <th><i class="fas fa-envelope"></i> Email</th>
+                                        <th><i class="fas fa-book"></i> Subject</th>
+                                        <th><i class="fas fa-school"></i> Class</th>
+                                        <th><i class="fas fa-id-badge"></i> ID</th>
+                                        <th><i class="fas fa-cogs"></i> Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($assignments as $assignment): ?>
+                                    <tr class="assignment-row">
+                                        <td>
+                                            <div class="teacher-info">
+                                                <div class="teacher-avatar">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                                <span
+                                                    class="teacher-name"><?php echo htmlspecialchars($assignment['teacher_name']); ?></span>
+                                            </div>
+                                        </td>
+                                        <td class="teacher-email">
+                                            <?php echo htmlspecialchars($assignment['teacher_email']); ?></td>
+                                        <td>
+                                            <span
+                                                class="subject-badge"><?php echo htmlspecialchars($assignment['subject_name']); ?></span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="class-badge"><?php echo htmlspecialchars($assignment['class_name']); ?></span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="assignment-id">#<?php echo $assignment['assignment_id']; ?></span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button type="button"
+                                                    onclick="viewAssignmentDetails(<?php echo $assignment['assignment_id']; ?>)"
+                                                    class="btn btn-sm btn-info" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button type="button"
+                                                    onclick="unassignTeacher(<?php echo $assignment['id']; ?>)"
+                                                    class="btn btn-sm btn-danger" title="Unassign Teacher">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -399,7 +409,7 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </main>
     </div>
 
-    <!-- Enhanced Assignment Modal -->
+
     <div id="assignModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -420,10 +430,10 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <select id="teacherSelect" name="teacher_id" required>
                                     <option value="">-- Choose a teacher --</option>
                                     <?php foreach ($teachers as $teacher): ?>
-                                        <option value="<?php echo $teacher['id']; ?>">
-                                            <?php echo htmlspecialchars($teacher['name']); ?>
-                                            (<?php echo htmlspecialchars($teacher['email']); ?>)
-                                        </option>
+                                    <option value="<?php echo $teacher['id']; ?>">
+                                        <?php echo htmlspecialchars($teacher['name']); ?>
+                                        (<?php echo htmlspecialchars($teacher['email']); ?>)
+                                    </option>
                                     <?php endforeach; ?>
                                 </select>
                                 <i class="fas fa-chevron-down select-arrow"></i>
@@ -438,9 +448,9 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <select id="subjectSelect" name="subject_id" required>
                                     <option value="">-- Choose a subject --</option>
                                     <?php foreach ($subjects as $subject): ?>
-                                        <option value="<?php echo $subject['id']; ?>">
-                                            <?php echo htmlspecialchars($subject['name']); ?>
-                                        </option>
+                                    <option value="<?php echo $subject['id']; ?>">
+                                        <?php echo htmlspecialchars($subject['name']); ?>
+                                    </option>
                                     <?php endforeach; ?>
                                 </select>
                                 <i class="fas fa-chevron-down select-arrow"></i>
@@ -455,9 +465,9 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <select id="classSelect" name="class_id" required>
                                     <option value="">-- Choose a class --</option>
                                     <?php foreach ($classes as $class): ?>
-                                        <option value="<?php echo $class['id']; ?>">
-                                            <?php echo htmlspecialchars($class['name']); ?>
-                                        </option>
+                                    <option value="<?php echo $class['id']; ?>">
+                                        <?php echo htmlspecialchars($class['name']); ?>
+                                    </option>
                                     <?php endforeach; ?>
                                 </select>
                                 <i class="fas fa-chevron-down select-arrow"></i>
@@ -493,388 +503,267 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
-    <!-- Enhanced CSS Styles -->
     <style>
-        /* Enhanced Select Wrapper */
-        .select-wrapper {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
+    .select-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
 
-        .select-wrapper select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            padding-right: 2.5rem;
-            background: white;
-            cursor: pointer;
-        }
+    .select-wrapper select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.5rem;
+        background: white;
+        cursor: pointer;
+    }
 
-        .select-arrow {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            pointer-events: none;
-            font-size: 0.875rem;
-        }
+    .select-arrow {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        pointer-events: none;
+        font-size: 0.875rem;
+    }
 
-        /* Enhanced Teacher Info */
-        .teacher-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+    .teacher-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-        .teacher-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-        }
+    .teacher-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
 
-        .teacher-name {
-            font-weight: 600;
-            color: #374151;
-        }
+    .teacher-name {
+        font-weight: 600;
+        color: #374151;
+    }
 
-        /* Enhanced Badges */
-        .subject-badge,
-        .class-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: inline-block;
-        }
+    /* Enhanced Badges */
+    .subject-badge,
+    .class-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-block;
+    }
 
-        .class-badge {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
+    .class-badge {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
 
-        .assignment-id {
-            font-family: 'Courier New', monospace;
-            background: #f3f4f6;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-weight: 600;
-            color: #374151;
-        }
+    .assignment-id {
+        font-family: 'Courier New', monospace;
+        background: #f3f4f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+        color: #374151;
+    }
 
-        /* Enhanced Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
 
-        /* Enhanced Table Styles */
-        .assignment-row:hover {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        }
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
 
-        .table-container {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
+    .assignment-row:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
 
-        /* Enhanced Header Actions */
+    .table-container {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 300px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
+
+    .search-box input {
+        padding-left: 2.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        width: 100%;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .search-box input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .enhanced-form {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .enhanced-filters-form {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .form-group label i {
+        color: #667eea;
+    }
+
+
+    .assignment-preview {
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        border: 1px solid #a5b4fc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .assignment-preview h4 {
+        margin: 0 0 1rem 0;
+        color: #3730a3;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preview-content {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .preview-item {
+        color: #374151;
+    }
+
+    .preview-item strong {
+        color: #1f2937;
+    }
+
+    .card-header p {
+        margin: 0.5rem 0 0 0;
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
         .header-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            margin-top: 1rem;
+            flex-direction: column;
+            align-items: stretch;
         }
 
         .search-box {
-            position: relative;
-            flex: 1;
-            max-width: 300px;
+            max-width: none;
         }
 
-        .search-box i {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
+        .action-buttons {
+            flex-direction: column;
         }
 
-        .search-box input {
-            padding-left: 2.5rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            width: 100%;
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
-        }
-
-        .search-box input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Enhanced Form Styles */
-        .enhanced-form {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .enhanced-filters-form {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .form-group label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .form-group label i {
-            color: #667eea;
-        }
-
-        /* Assignment Preview */
-        .assignment-preview {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-            border: 1px solid #a5b4fc;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-
-        .assignment-preview h4 {
-            margin: 0 0 1rem 0;
-            color: #3730a3;
-            display: flex;
-            align-items: center;
+        .teacher-info {
+            flex-direction: column;
+            align-items: flex-start;
             gap: 0.5rem;
         }
-
-        .preview-content {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        .preview-item {
-            color: #374151;
-        }
-
-        .preview-item strong {
-            color: #1f2937;
-        }
-
-        /* Enhanced Card Header */
-        .card-header p {
-            margin: 0.5rem 0 0 0;
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-box {
-                max-width: none;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .teacher-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-        }
+    }
     </style>
 
-    <!-- Enhanced JavaScript -->
     <script src="../assets/js/responsive-modal.js"></script>
     <script>
-        // Initialize responsive modal
-        let assignModal;
+    let assignModal;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            assignModal = new ResponsiveModal('assignModal');
+    document.addEventListener('DOMContentLoaded', function() {
+        assignModal = new ResponsiveModal('assignModal');
 
-            // Add change listeners for assignment preview
-            document.getElementById('teacherSelect').addEventListener('change', updateAssignmentPreview);
-            document.getElementById('subjectSelect').addEventListener('change', updateAssignmentPreview);
-            document.getElementById('classSelect').addEventListener('change', updateAssignmentPreview);
-        });
 
-        // Enhanced modal functions
-        function openAssignModal() {
-            const form = document.getElementById('assignForm');
-            if (form) form.reset();
+        document.getElementById('teacherSelect').addEventListener('change', updateAssignmentPreview);
+        document.getElementById('subjectSelect').addEventListener('change', updateAssignmentPreview);
+        document.getElementById('classSelect').addEventListener('change', updateAssignmentPreview);
+    });
 
-            const preview = document.getElementById('assignmentPreview');
-            if (preview) preview.style.display = 'none';
 
-            if (assignModal) {
-                assignModal.open();
-            }
+    function openAssignModal() {
+        const form = document.getElementById('assignForm');
+        if (form) form.reset();
+
+        const preview = document.getElementById('assignmentPreview');
+        if (preview) preview.style.display = 'none';
+
+        if (assignModal) {
+            assignModal.open();
         }
+    }
 
-        function closeModal() {
-            if (assignModal) {
-                assignModal.close();
-            }
+    function closeModal() {
+        if (assignModal) {
+            assignModal.close();
         }
+    }
 
-        // Enhanced unassign function
-        function unassignTeacher(assignmentId) {
-            if (confirm('Are you sure you want to unassign this teacher? This action cannot be undone.')) {
-                const button = event.target.closest('button');
-                const originalContent = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                button.disabled = true;
-
-                fetch('assign_teacher.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: 'action=unassign&id=' + assignmentId
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showNotification(data.message, 'success');
-                            location.reload();
-                        } else {
-                            showNotification('Error: ' + data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('An error occurred while unassigning the teacher', 'error');
-                    })
-                    .finally(() => {
-                        button.innerHTML = originalContent;
-                        button.disabled = false;
-                    });
-            }
-        }
-
-        // Filter assignments function
-        function filterAssignments() {
-            const searchTerm = document.getElementById('searchAssignments').value.toLowerCase();
-            const rows = document.querySelectorAll('.assignment-row');
-
-            rows.forEach(row => {
-                const teacherName = row.querySelector('.teacher-name').textContent.toLowerCase();
-                const teacherEmail = row.querySelector('.teacher-email').textContent.toLowerCase();
-                const subjectName = row.querySelector('.subject-badge').textContent.toLowerCase();
-                const className = row.querySelector('.class-badge').textContent.toLowerCase();
-
-                const matches = teacherName.includes(searchTerm) ||
-                    teacherEmail.includes(searchTerm) ||
-                    subjectName.includes(searchTerm) ||
-                    className.includes(searchTerm);
-
-                if (matches) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        // View assignment details function
-        function viewAssignmentDetails(assignmentId) {
-            alert('Assignment details view coming soon!');
-        }
-
-        // Bulk assign modal function
-        function showBulkAssignModal() {
-            alert('Bulk assignment feature coming soon!');
-        }
-
-        // Export assignments function
-        function exportAssignments() {
-            alert('Export feature coming soon!');
-        }
-
-        // Toggle advanced filters function
-        function toggleAdvancedFilters() {
-            alert('Advanced filters coming soon!');
-        }
-
-        // Show notification function
-        function showNotification(message, type) {
-            // Simple notification - can be enhanced with a proper notification system
-            if (type === 'success') {
-                alert('✓ ' + message);
-            } else {
-                alert('✗ ' + message);
-            }
-        }
-
-        // Update assignment preview
-        function updateAssignmentPreview() {
-            const teacherSelect = document.getElementById('teacherSelect');
-            const subjectSelect = document.getElementById('subjectSelect');
-            const classSelect = document.getElementById('classSelect');
-            const preview = document.getElementById('assignmentPreview');
-
-            if (teacherSelect.value && subjectSelect.value && classSelect.value) {
-                document.getElementById('previewTeacher').textContent = teacherSelect.options[teacherSelect.selectedIndex].text;
-                document.getElementById('previewSubject').textContent = subjectSelect.options[subjectSelect.selectedIndex].text;
-                document.getElementById('previewClass').textContent = classSelect.options[classSelect.selectedIndex].text;
-                preview.style.display = 'block';
-            } else {
-                preview.style.display = 'none';
-            }
-        }
-
-        // Enhanced form submission
-        document.getElementById('assignForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            submitBtn.disabled = true;
+    function unassignTeacher(assignmentId) {
+        if (confirm('Are you sure you want to unassign this teacher? This action cannot be undone.')) {
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
 
             fetch('assign_teacher.php', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: formData
+                    body: 'action=unassign&id=' + assignmentId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         showNotification(data.message, 'success');
-                        closeModal();
                         location.reload();
                     } else {
                         showNotification('Error: ' + data.message, 'error');
@@ -882,13 +771,121 @@ $assignments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showNotification('An error occurred while processing the request', 'error');
+                    showNotification('An error occurred while unassigning the teacher', 'error');
                 })
                 .finally(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
                 });
+        }
+    }
+
+    function filterAssignments() {
+        const searchTerm = document.getElementById('searchAssignments').value.toLowerCase();
+        const rows = document.querySelectorAll('.assignment-row');
+
+        rows.forEach(row => {
+            const teacherName = row.querySelector('.teacher-name').textContent.toLowerCase();
+            const teacherEmail = row.querySelector('.teacher-email').textContent.toLowerCase();
+            const subjectName = row.querySelector('.subject-badge').textContent.toLowerCase();
+            const className = row.querySelector('.class-badge').textContent.toLowerCase();
+
+            const matches = teacherName.includes(searchTerm) ||
+                teacherEmail.includes(searchTerm) ||
+                subjectName.includes(searchTerm) ||
+                className.includes(searchTerm);
+
+            if (matches) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
         });
+    }
+
+
+    function viewAssignmentDetails(assignmentId) {
+        alert('Assignment details view coming soon!');
+    }
+
+    function showBulkAssignModal() {
+        alert('Bulk assignment feature coming soon!');
+    }
+
+    function exportAssignments() {
+        alert('Export feature coming soon!');
+    }
+
+
+    function toggleAdvancedFilters() {
+        alert('Advanced filters coming soon!');
+    }
+
+
+    function showNotification(message, type) {
+
+        if (type === 'success') {
+            alert('✓ ' + message);
+        } else {
+            alert('✗ ' + message);
+        }
+    }
+
+    function updateAssignmentPreview() {
+        const teacherSelect = document.getElementById('teacherSelect');
+        const subjectSelect = document.getElementById('subjectSelect');
+        const classSelect = document.getElementById('classSelect');
+        const preview = document.getElementById('assignmentPreview');
+
+        if (teacherSelect.value && subjectSelect.value && classSelect.value) {
+            document.getElementById('previewTeacher').textContent = teacherSelect.options[teacherSelect.selectedIndex]
+                .text;
+            document.getElementById('previewSubject').textContent = subjectSelect.options[subjectSelect.selectedIndex]
+                .text;
+            document.getElementById('previewClass').textContent = classSelect.options[classSelect.selectedIndex].text;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+
+    document.getElementById('assignForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+
+        fetch('assign_teacher.php', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    closeModal();
+                    location.reload();
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred while processing the request', 'error');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    });
     </script>
 </body>
 

@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_W
 
     $action = $_POST['action'] ?? '';
 
-    // Debug logging
+
     error_log("Admin action: " . $action . " by user: " . $_SESSION['user_id']);
 
     switch ($action) {
@@ -211,6 +211,45 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="../assets/css/teacher.css">
     <link rel="stylesheet" href="../assets/css/responsive-modal.css">
 </head>
+<style>
+.form-actions.search-input {
+    width: 100%;
+    max-width: 280px;
+    padding: 0.75rem 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+    background-color: #fff;
+    color: #333;
+}
+
+.search-input:focus {
+    border-color: #6366f1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.filters-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+}
+
+.filters-section {
+    padding: 1.5rem 2rem;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.filters-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+}
+</style>
 
 <body>
     <div class="dashboard-container">
@@ -266,32 +305,42 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </button>
                 </div>
             </header>
-            <div class="filters-section">
-                <form method="GET" class="filters-form">
-                    <div class="filter-group">
-                        <label style="font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 0.25rem;">Search Users</label>
-                        <input type="text" name="search" placeholder="🔍 Search by name or email..."
-                            value="<?php echo htmlspecialchars($search); ?>" style="width: 280px;">
+            <div class="container-fluid mb-4">
+                <form method="GET" class="row align-items-end g-2">
+                    <!-- Search Bar -->
+                    <div class="col-md-5">
+                        <label for="search" class="form-label fw-semibold text-muted small">Search Users</label>
+                        <input type="text" class="form-control" id="search" name="search"
+                            placeholder="🔍 Search by name or email..."
+                            value="<?php echo htmlspecialchars($search); ?>">
                     </div>
-                    <div class="filter-group">
-                        <label style="font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 0.25rem;">Filter by Role</label>
-                        <select name="role">
+
+                    <!-- Role Filter -->
+                    <div class="col-md-3">
+                        <label for="role" class="form-label fw-semibold text-muted small">Filter by Role</label>
+                        <select class="form-select" id="role" name="role">
                             <option value="">All Roles</option>
-                            <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>👑 Admin</option>
-                            <option value="teacher" <?php echo $role_filter === 'teacher' ? 'selected' : ''; ?>>👨‍🏫 Teacher</option>
-                            <option value="student" <?php echo $role_filter === 'student' ? 'selected' : ''; ?>>👨‍🎓 Student</option>
+                            <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>👑 Admin
+                            </option>
+                            <option value="teacher" <?php echo $role_filter === 'teacher' ? 'selected' : ''; ?>>👨‍🏫
+                                Teacher</option>
+                            <option value="student" <?php echo $role_filter === 'student' ? 'selected' : ''; ?>>👨‍🎓
+                                Student</option>
                         </select>
                     </div>
-                    <div class="filter-group" style="margin-top: 1.5rem;">
-                        <button type="submit" class="btn btn-secondary">
+
+                    <!-- Buttons -->
+                    <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-50">
                             <i class="fas fa-search"></i> Search
                         </button>
-                        <a href="manage_user.php" class="btn btn-outline">
+                        <a href="manage_user.php" class="btn btn-outline-secondary w-50">
                             <i class="fas fa-times"></i> Clear
                         </a>
                     </div>
                 </form>
             </div>
+
             <div class="content-card">
                 <div class="card-header">
                     <h3><i class="fas fa-list"></i> Users (<?php echo count($users); ?>)</h3>
@@ -303,57 +352,58 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
                 <div class="card-content">
                     <?php if (empty($users)): ?>
-                        <p style="text-align: center; color: #666; padding: 2rem;">
-                            No users found matching your criteria.
-                        </p>
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        No users found matching your criteria.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($users as $user): ?>
-                                        <tr>
-                                            <td><?php echo $user['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($user['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                            <td>
-                                                <span class="badge badge-<?php echo $user['role']; ?>">
-                                                    <?php echo ucfirst($user['role']); ?>
-                                                </span>
-                                            </td>
-                                            <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn-icon btn-edit"
-                                                        onclick="editUser(<?php echo $user['id']; ?>)" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn-icon btn-warning"
-                                                        onclick="resetPassword(<?php echo $user['id']; ?>)" title="Reset Password">
-                                                        <i class="fas fa-key"></i>
-                                                    </button>
-                                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                                        <button class="btn-icon btn-delete"
-                                                            onclick="deleteUser(<?php echo $user['id']; ?>)" title="Delete">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($users as $user): ?>
+                                <tr>
+                                    <td><?php echo $user['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($user['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td>
+                                        <span class="badge badge-<?php echo $user['role']; ?>">
+                                            <?php echo ucfirst($user['role']); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-edit"
+                                                onclick="editUser(<?php echo $user['id']; ?>)" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon btn-warning"
+                                                onclick="resetPassword(<?php echo $user['id']; ?>)"
+                                                title="Reset Password">
+                                                <i class="fas fa-key"></i>
+                                            </button>
+                                            <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                            <button class="btn-icon btn-delete"
+                                                onclick="deleteUser(<?php echo $user['id']; ?>)" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -404,313 +454,314 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     <!-- Custom User Management Styles -->
     <style>
-        /* Enhanced Modal Padding */
-        .modal-content {
-            padding: 0 !important;
-        }
+    /* Enhanced Modal Padding */
+    .modal-content {
+        padding: 0 !important;
+    }
 
+    .modal-header {
+        padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+    }
+
+    .modal-body {
+        padding: 0 2.5rem 2.5rem 2.5rem !important;
+    }
+
+    .form-group {
+        margin-bottom: 2rem !important;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .form-actions {
+        margin-top: 2.5rem !important;
+        padding-top: 2rem !important;
+        border-top: 2px solid #e5e7eb !important;
+    }
+
+    /* User role badges */
+    .user-role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .user-role-badge.admin {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .user-role-badge.teacher {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .user-role-badge.student {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    /* Enhanced form styling */
+    .form-group label {
+        margin-bottom: 0.75rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        border-radius: 10px !important;
+        border: 2px solid #e5e7eb !important;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+    }
+
+    /* Responsive padding adjustments */
+    @media (max-width: 768px) {
         .modal-header {
-            padding: 2rem 2.5rem 1.5rem 2.5rem !important;
+            padding: 1.5rem 2rem 1rem 2rem !important;
         }
 
         .modal-body {
-            padding: 0 2.5rem 2.5rem 2.5rem !important;
+            padding: 0 2rem 2rem 2rem !important;
         }
 
         .form-group {
-            margin-bottom: 2rem !important;
-        }
-
-        .form-group:last-child {
             margin-bottom: 1.5rem !important;
         }
 
         .form-actions {
-            margin-top: 2.5rem !important;
-            padding-top: 2rem !important;
-            border-top: 2px solid #e5e7eb !important;
+            margin-top: 2rem !important;
+            padding-top: 1.5rem !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .modal-header {
+            padding: 1rem 1.5rem 0.75rem 1.5rem !important;
         }
 
-        /* User role badges */
-        .user-role-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+        .modal-body {
+            padding: 0 1.5rem 1.5rem 1.5rem !important;
         }
 
-        .user-role-badge.admin {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
+        .form-group {
+            margin-bottom: 1.25rem !important;
         }
 
-        .user-role-badge.teacher {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
+        .form-actions {
+            margin-top: 1.5rem !important;
+            padding-top: 1.25rem !important;
         }
-
-        .user-role-badge.student {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-
-        /* Enhanced form styling */
-        .form-group label {
-            margin-bottom: 0.75rem !important;
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-        }
-
-        .form-group input,
-        .form-group select {
-            padding: 1rem !important;
-            font-size: 1rem !important;
-            border-radius: 10px !important;
-            border: 2px solid #e5e7eb !important;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
-        }
-
-        /* Responsive padding adjustments */
-        @media (max-width: 768px) {
-            .modal-header {
-                padding: 1.5rem 2rem 1rem 2rem !important;
-            }
-
-            .modal-body {
-                padding: 0 2rem 2rem 2rem !important;
-            }
-
-            .form-group {
-                margin-bottom: 1.5rem !important;
-            }
-
-            .form-actions {
-                margin-top: 2rem !important;
-                padding-top: 1.5rem !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .modal-header {
-                padding: 1rem 1.5rem 0.75rem 1.5rem !important;
-            }
-
-            .modal-body {
-                padding: 0 1.5rem 1.5rem 1.5rem !important;
-            }
-
-            .form-group {
-                margin-bottom: 1.25rem !important;
-            }
-
-            .form-actions {
-                margin-top: 1.5rem !important;
-                padding-top: 1.25rem !important;
-            }
-        }
+    }
     </style>
 
     <script src="../assets/js/responsive-modal.js"></script>
     <script>
-        // Initialize responsive modal
-        let userModal;
+    // Initialize responsive modal
+    let userModal;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            userModal = new ResponsiveModal('userModal');
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        userModal = new ResponsiveModal('userModal');
+    });
 
-        function openCreateModal() {
-            // Reset form and set up for creation
-            const form = document.getElementById('userForm');
-            if (form) form.reset();
+    function openCreateModal() {
+        // Reset form and set up for creation
+        const form = document.getElementById('userForm');
+        if (form) form.reset();
 
-            // Set modal title and action
-            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Add New User';
-            document.getElementById('formAction').value = 'create';
-            document.getElementById('submitBtn').textContent = 'Create User';
+        // Set modal title and action
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Add New User';
+        document.getElementById('formAction').value = 'create';
+        document.getElementById('submitBtn').textContent = 'Create User';
 
-            // Show password field for new users
-            const passwordGroup = document.getElementById('passwordGroup');
-            const passwordField = document.getElementById('userPassword');
-            if (passwordGroup && passwordField) {
-                passwordGroup.style.display = 'block';
-                passwordField.required = true;
-            }
-
-            // Clear user ID for new user
-            document.getElementById('userId').value = '';
-
-            // Open modal using responsive modal system
-            if (userModal) {
-                userModal.open();
-            }
+        // Show password field for new users
+        const passwordGroup = document.getElementById('passwordGroup');
+        const passwordField = document.getElementById('userPassword');
+        if (passwordGroup && passwordField) {
+            passwordGroup.style.display = 'block';
+            passwordField.required = true;
         }
 
-        function editUser(userId) {
-            if (!userId) {
-                alert('Invalid user ID');
-                return;
-            }
+        // Clear user ID for new user
+        document.getElementById('userId').value = '';
 
+        // Open modal using responsive modal system
+        if (userModal) {
+            userModal.open();
+        }
+    }
+
+    function editUser(userId) {
+        if (!userId) {
+            alert('Invalid user ID');
+            return;
+        }
+
+        fetch('manage_user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'action=get&id=' + encodeURIComponent(userId)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.user) {
+                    // Set modal title and action
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit User';
+                    document.getElementById('formAction').value = 'update';
+                    document.getElementById('submitBtn').textContent = 'Update User';
+
+                    // Hide password field for editing
+                    const passwordGroup = document.getElementById('passwordGroup');
+                    const passwordField = document.getElementById('userPassword');
+                    if (passwordGroup && passwordField) {
+                        passwordGroup.style.display = 'none';
+                        passwordField.required = false;
+                    }
+
+                    // Populate form fields
+                    document.getElementById('userId').value = data.user.id || '';
+                    document.getElementById('userName').value = data.user.name || '';
+                    document.getElementById('userEmail').value = data.user.email || '';
+                    document.getElementById('userRole').value = data.user.role || '';
+
+                    // Show modal using responsive modal system
+                    if (userModal) {
+                        userModal.open();
+                    }
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to load user data'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching user data. Please try again.');
+            });
+    }
+
+    function deleteUser(userId) {
+        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
             fetch('manage_user.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'action=get&id=' + encodeURIComponent(userId)
+                    body: 'action=delete&id=' + userId
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    if (data.success && data.user) {
-                        // Set modal title and action
-                        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit User';
-                        document.getElementById('formAction').value = 'update';
-                        document.getElementById('submitBtn').textContent = 'Update User';
-
-                        // Hide password field for editing
-                        const passwordGroup = document.getElementById('passwordGroup');
-                        const passwordField = document.getElementById('userPassword');
-                        if (passwordGroup && passwordField) {
-                            passwordGroup.style.display = 'none';
-                            passwordField.required = false;
-                        }
-
-                        // Populate form fields
-                        document.getElementById('userId').value = data.user.id || '';
-                        document.getElementById('userName').value = data.user.name || '';
-                        document.getElementById('userEmail').value = data.user.email || '';
-                        document.getElementById('userRole').value = data.user.role || '';
-
-                        // Show modal using responsive modal system
-                        if (userModal) {
-                            userModal.open();
-                        }
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
                     } else {
-                        alert('Error: ' + (data.message || 'Failed to load user data'));
+                        alert('Error: ' + data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while fetching user data. Please try again.');
+                    alert('An error occurred while deleting the user');
                 });
         }
+    }
 
-        function deleteUser(userId) {
-            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    function resetPassword(userId) {
+        const newPassword = prompt('Enter new password (minimum 6 characters):');
+        if (newPassword && newPassword.length >= 6) {
+            if (confirm('Are you sure you want to reset this user\'s password?')) {
                 fetch('manage_user.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: 'action=delete&id=' + userId
+                        body: 'action=reset_password&id=' + userId + '&new_password=' + encodeURIComponent(
+                            newPassword)
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
                             alert(data.message);
-                            location.reload();
                         } else {
                             alert('Error: ' + data.message);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('An error occurred while deleting the user');
+                        alert('An error occurred while resetting the password');
                     });
             }
+        } else if (newPassword !== null) {
+            alert('Password must be at least 6 characters long');
         }
+    }
 
-        function resetPassword(userId) {
-            const newPassword = prompt('Enter new password (minimum 6 characters):');
-            if (newPassword && newPassword.length >= 6) {
-                if (confirm('Are you sure you want to reset this user\'s password?')) {
-                    fetch('manage_user.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: 'action=reset_password&id=' + userId + '&new_password=' + encodeURIComponent(newPassword)
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message);
-                            } else {
-                                alert('Error: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred while resetting the password');
-                        });
+    function closeModal() {
+        if (userModal) {
+            userModal.close();
+        }
+    }
+
+    // Enhanced form submission
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+
+        fetch('manage_user.php', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-            } else if (newPassword !== null) {
-                alert('Password must be at least 6 characters long');
-            }
-        }
-
-        function closeModal() {
-            if (userModal) {
-                userModal.close();
-            }
-        }
-
-        // Enhanced form submission
-        document.getElementById('userForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            submitBtn.disabled = true;
-
-            fetch('manage_user.php', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert('✓ ' + data.message);
-                        closeModal();
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        alert('✗ Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('✗ An error occurred while processing the request');
-                })
-                .finally(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                });
-        });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('✓ ' + data.message);
+                    closeModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    alert('✗ Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('✗ An error occurred while processing the request');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    });
     </script>
 </body>
 

@@ -189,7 +189,7 @@ try {
         $recent_assignments[] = $row;
     }
 } catch (Exception $e) {
-    // Fallback: get all assignments without is_active filter
+
     $query = "SELECT a.id, a.title, a.due_date,
               CASE
                 WHEN s.id IS NOT NULL THEN 'Submitted'
@@ -350,21 +350,21 @@ try {
                     </div>
                     <div class="card-content">
                         <?php if (empty($enrolled_classes)): ?>
-                            <p style="color: #666; text-align: center; padding: 2rem;">
-                                You are not enrolled in any classes yet. Contact admin for enrollment.
-                            </p>
+                        <p style="color: #666; text-align: center; padding: 2rem;">
+                            You are not enrolled in any classes yet. Contact admin for enrollment.
+                        </p>
                         <?php else: ?>
-                            <div class="class-list">
-                                <?php foreach ($enrolled_classes as $class): ?>
-                                    <div class="class-item"
-                                        style="padding: 1rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; margin-bottom: 1rem;">
-                                        <h4 style="margin: 0 0 0.5rem 0; color: #333;">
-                                            <?php echo htmlspecialchars($class['class_name']); ?></h4>
-                                        <a href="classes.php?id=<?php echo $class['class_id']; ?>"
-                                            class="btn btn-sm btn-outline">View Details</a>
-                                    </div>
-                                <?php endforeach; ?>
+                        <div class="class-list">
+                            <?php foreach ($enrolled_classes as $class): ?>
+                            <div class="class-item"
+                                style="padding: 1rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; margin-bottom: 1rem;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #333;">
+                                    <?php echo htmlspecialchars($class['class_name']); ?></h4>
+                                <a href="classes.php?id=<?php echo $class['class_id']; ?>"
+                                    class="btn btn-sm btn-outline">View Details</a>
                             </div>
+                            <?php endforeach; ?>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -376,45 +376,45 @@ try {
                     </div>
                     <div class="card-content">
                         <?php if (empty($recent_quizzes)): ?>
-                            <p style="color: #666; text-align: center; padding: 2rem;">
-                                No quizzes available yet.
-                            </p>
+                        <p style="color: #666; text-align: center; padding: 2rem;">
+                            No quizzes available yet.
+                        </p>
                         <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Quiz Title</th>
-                                            <th>Status</th>
-                                            <th>Date</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($recent_quizzes as $quiz): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($quiz['title']); ?></td>
-                                                <td>
-                                                    <span
-                                                        class="badge badge-<?php echo $quiz['status'] === 'Completed' ? 'success' : 'warning'; ?>">
-                                                        <?php echo $quiz['status']; ?>
-                                                    </span>
-                                                </td>
-                                                <td><?php echo date('M j, Y', strtotime($quiz['created_at'])); ?></td>
-                                                <td>
-                                                    <?php if ($quiz['status'] === 'Available'): ?>
-                                                        <a href="take_quiz.php?id=<?php echo $quiz['id']; ?>"
-                                                            class="btn btn-sm btn-primary">Take Quiz</a>
-                                                    <?php else: ?>
-                                                        <a href="view_result.php?quiz_id=<?php echo $quiz['id']; ?>"
-                                                            class="btn btn-sm btn-secondary">View Result</a>
-                                                    <?php endif; ?>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz Title</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($recent_quizzes as $quiz): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($quiz['title']); ?></td>
+                                        <td>
+                                            <span
+                                                class="badge badge-<?php echo $quiz['status'] === 'Completed' ? 'success' : 'warning'; ?>">
+                                                <?php echo $quiz['status']; ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo date('M j, Y', strtotime($quiz['created_at'])); ?></td>
+                                        <td>
+                                            <?php if ($quiz['status'] === 'Available'): ?>
+                                            <a href="take_quiz.php?id=<?php echo $quiz['id']; ?>"
+                                                class="btn btn-sm btn-primary">Take Quiz</a>
+                                            <?php else: ?>
+                                            <a href="view_result.php?quiz_id=<?php echo $quiz['id']; ?>"
+                                                class="btn btn-sm btn-secondary">View Result</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -427,43 +427,43 @@ try {
                 </div>
                 <div class="card-content">
                     <?php if (empty($recent_assignments)): ?>
-                        <p style="color: #666; text-align: center; padding: 2rem;">
-                            No assignments available yet.
-                        </p>
+                    <p style="color: #666; text-align: center; padding: 2rem;">
+                        No assignments available yet.
+                    </p>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Assignment Title</th>
-                                        <th>Due Date</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($recent_assignments as $assignment): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($assignment['title']); ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($assignment['due_date'])); ?></td>
-                                            <td>
-                                                <span class="badge badge-<?php
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Assignment Title</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recent_assignments as $assignment): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($assignment['title']); ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($assignment['due_date'])); ?></td>
+                                    <td>
+                                        <span class="badge badge-<?php
                                                                             echo $assignment['status'] === 'Submitted' ? 'success' : ($assignment['status'] === 'Overdue' ? 'danger' : 'warning');
                                                                             ?>">
-                                                    <?php echo $assignment['status']; ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <a href="assignments.php?view=<?php echo $assignment['id']; ?>"
-                                                    class="btn btn-sm btn-primary">
-                                                    <?php echo $assignment['status'] === 'Submitted' ? 'View Submission' : 'Submit'; ?>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                            <?php echo $assignment['status']; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="assignments.php?view=<?php echo $assignment['id']; ?>"
+                                            class="btn btn-sm btn-primary">
+                                            <?php echo $assignment['status'] === 'Submitted' ? 'View Submission' : 'Submit'; ?>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>

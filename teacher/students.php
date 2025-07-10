@@ -1,6 +1,4 @@
 <?php
-copy(__FILE__, dirname(__FILE__) . '/students.php');
-
 session_start();
 require_once '../config/db.php';
 
@@ -10,7 +8,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
 }
 
 $teacher_id = $_SESSION['user_id'];
-
 
 $students_query = "SELECT DISTINCT u.id, u.name, u.email, c.name as class_name, s.name as subject_name
                   FROM users u
@@ -24,7 +21,6 @@ $students_stmt = $conn->prepare($students_query);
 $students_stmt->bind_param("i", $teacher_id);
 $students_stmt->execute();
 $students = $students_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-
 
 $grouped_students = [];
 foreach ($students as $student) {
@@ -51,38 +47,161 @@ foreach ($students as $student) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Students - Teacher Panel</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/teacher.css">
 </head>
+<style>
+    .students-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .student-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: 0.3s ease;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .student-header {
+        display: flex;
+        align-items: center;
+        padding: 1.2rem;
+        background-color: #f4f6f9;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .student-avatar {
+        width: 60px;
+        height: 60px;
+        background-color: #4f46e5;
+        border-radius: 50%;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-right: 1rem;
+    }
+
+    .student-info h3 {
+        margin: 0 0 0.25rem;
+        font-size: 1.2rem;
+        color: #1f2937;
+    }
+
+    .student-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .student-classes {
+        padding: 1rem 1.5rem;
+        flex-grow: 1;
+    }
+
+    .student-classes h4 {
+        margin-bottom: 0.6rem;
+        font-size: 0.95rem;
+        color: #374151;
+        font-weight: 600;
+    }
+
+    .classes-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .class-item {
+        background-color: #eef2ff;
+        padding: 0.4rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #4338ca;
+        font-weight: 500;
+    }
+
+    .student-actions {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: flex-end;
+        background-color: #f9fafb;
+    }
+
+    .student-actions .btn {
+        background-color: #4f46e5;
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: background 0.2s;
+    }
+
+    .student-actions .btn:hover {
+        background-color: #4338ca;
+    }
+
+    .students-summary {
+        text-align: center;
+        margin-top: 2rem;
+        font-size: 0.95rem;
+        color: #6b7280;
+    }
+</style>
 
 <body>
     <div class="dashboard-container">
-
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-chalkboard-teacher"></i> Teacher Panel</h2>
+                <h2><i class="fas fa-graduation-cap"></i> EduLearn</h2>
+                <p>Teacher Panel</p>
             </div>
 
             <nav class="sidebar-nav">
                 <a href="dashboard.php" class="nav-item">
-                    <i class="fas fa-home"></i>
+                    <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
+                </a>
+                <a href="classes.php" class="nav-item">
+                    <i class="fas fa-school"></i>
+                    <span>My Classes</span>
+                </a>
+                <a href="quizzes.php" class="nav-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Quizzes</span>
                 </a>
                 <a href="assignments.php" class="nav-item">
                     <i class="fas fa-tasks"></i>
-                    <span>My Assignments</span>
+                    <span>Assignments</span>
                 </a>
-                <a href="manage_assignment.php" class="nav-item">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Create Assignment</span>
+                <a href="grades.php" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Grades</span>
                 </a>
-                <a href="manage_quiz.php" class="nav-item">
-                    <i class="fas fa-question-circle"></i>
-                    <span>Manage Quizzes</span>
-                </a>
-                <a href="view_students.php" class="nav-item active">
+                <a href="students.php" class="nav-item active">
                     <i class="fas fa-users"></i>
-                    <span>My Students</span>
+                    <span>Students</span>
                 </a>
             </nav>
 
@@ -94,21 +213,26 @@ foreach ($students as $student) {
             </div>
         </aside>
 
-
         <main class="main-content">
             <header class="content-header">
                 <div class="header-left">
                     <h1>My Students</h1>
                     <p>Students enrolled in your classes</p>
                 </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                    </div>
+                </div>
             </header>
 
             <div class="content-body">
                 <?php if (empty($grouped_students)): ?>
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <h3>No Students Found</h3>
-                        <p>You don't have any students assigned to your classes yet.</p>
+                    <div class="empty-state" style="text-align:center; padding:2rem;">
+                        <i class="fas fa-users" style="font-size: 3rem; color: #ccc;"></i>
+                        <h3 style="margin-top: 1rem;">No Students Found</h3>
+                        <p>You don’t have any students assigned to your classes yet.</p>
                     </div>
                 <?php else: ?>
                     <div class="students-grid">
@@ -155,129 +279,6 @@ foreach ($students as $student) {
             </div>
         </main>
     </div>
-
-    <style>
-        .students-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .student-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .student-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .student-header {
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .student-avatar {
-            width: 50px;
-            height: 50px;
-            background: #f3f4f6;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            font-size: 1.5rem;
-        }
-
-        .student-info h3 {
-            margin: 0 0 0.25rem 0;
-            color: #1f2937;
-            font-size: 1.125rem;
-        }
-
-        .email {
-            margin: 0;
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-
-        .student-classes {
-            padding: 1rem 1.5rem;
-        }
-
-        .student-classes h4 {
-            margin: 0 0 0.75rem 0;
-            color: #374151;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .classes-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .class-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem;
-            background: #f9fafb;
-            border-radius: 4px;
-        }
-
-        .class-name {
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .subject-name {
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-
-        .student-actions {
-            padding: 1rem 1.5rem;
-            background: #f9fafb;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .students-summary {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: #f9fafb;
-            border-radius: 8px;
-            text-align: center;
-            color: #6b7280;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #6b7280;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            color: #d1d5db;
-            margin-bottom: 1rem;
-        }
-
-        .empty-state h3 {
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-    </style>
 </body>
 
 </html>

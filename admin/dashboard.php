@@ -105,7 +105,8 @@ while ($row = $result->fetch_assoc()) {
                 <div class="header-right">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="quickSearch" placeholder="Quick search..." onkeyup="performQuickSearch()">
+                        <input type="text" id="quickSearch" placeholder="Quick search..."
+                            onkeyup="performQuickSearch()">
                     </div>
                     <button onclick="showSystemStatus()" class="btn btn-info">
                         <i class="fas fa-heartbeat"></i> Status
@@ -211,16 +212,16 @@ while ($row = $result->fetch_assoc()) {
                                 </thead>
                                 <tbody>
                                     <?php foreach ($recent_users as $user): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($user['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                            <td>
-                                                <span class="badge badge-<?php echo $user['role']; ?>">
-                                                    <?php echo ucfirst($user['role']); ?>
-                                                </span>
-                                            </td>
-                                            <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
-                                        </tr>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($user['name']); ?></td>
+                                        <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                        <td>
+                                            <span class="badge badge-<?php echo $user['role']; ?>">
+                                                <?php echo ucfirst($user['role']); ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
+                                    </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
@@ -257,103 +258,102 @@ while ($row = $result->fetch_assoc()) {
         </main>
     </div>
 
-    <!-- Enhanced CSS Styles -->
+
     <style>
-        .search-box {
-            position: relative;
-            margin-right: 1rem;
-        }
+    .search-box {
+        position: relative;
+        margin-right: 1rem;
+    }
 
-        .search-box i {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-        }
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
 
+    .search-box input {
+        padding-left: 2.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        width: 250px;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .search-box input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .user-info i {
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
         .search-box input {
-            padding-left: 2.5rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            width: 250px;
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
-        }
-
-        .search-box input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            outline: none;
+            width: 200px;
         }
 
         .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: stretch;
             gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
         }
-
-        .user-info i {
-            color: #667eea;
-            font-size: 1.2rem;
-        }
-
-        @media (max-width: 768px) {
-            .search-box input {
-                width: 200px;
-            }
-
-            .header-right {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0.5rem;
-            }
-        }
+    }
     </style>
 
-    <!-- Enhanced JavaScript -->
+
     <script>
-        // Quick search functionality
-        function performQuickSearch() {
-            const searchTerm = document.getElementById('quickSearch').value.toLowerCase();
+    function performQuickSearch() {
+        const searchTerm = document.getElementById('quickSearch').value.toLowerCase();
 
-            if (searchTerm.length < 2) {
-                return;
-            }
-
-            // Simple search implementation - in a real app, this would make an AJAX call
-            console.log('Searching for:', searchTerm);
-
-            // You could implement actual search functionality here
-            // For now, we'll just show an alert
-            if (searchTerm.length > 3) {
-                // Simulate search results
-                setTimeout(() => {
-                    if (searchTerm.includes('user') || searchTerm.includes('student') || searchTerm.includes('teacher')) {
-                        showSearchResults('Found users matching: ' + searchTerm);
-                    } else if (searchTerm.includes('class')) {
-                        showSearchResults('Found classes matching: ' + searchTerm);
-                    } else {
-                        showSearchResults('No results found for: ' + searchTerm);
-                    }
-                }, 500);
-            }
+        if (searchTerm.length < 2) {
+            return;
         }
 
-        function showSearchResults(message) {
-            // Create a simple notification
-            const notification = document.createElement('div');
-            notification.style.cssText = `
+
+        console.log('Searching for:', searchTerm);
+
+
+        if (searchTerm.length > 3) {
+
+            setTimeout(() => {
+                if (searchTerm.includes('user') || searchTerm.includes('student') || searchTerm.includes(
+                        'teacher')) {
+                    showSearchResults('Found users matching: ' + searchTerm);
+                } else if (searchTerm.includes('class')) {
+                    showSearchResults('Found classes matching: ' + searchTerm);
+                } else {
+                    showSearchResults('No results found for: ' + searchTerm);
+                }
+            }, 500);
+        }
+    }
+
+    function showSearchResults(message) {
+
+        const notification = document.createElement('div');
+        notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
@@ -364,69 +364,67 @@ while ($row = $result->fetch_assoc()) {
                 z-index: 1000;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
+        notification.textContent = message;
+        document.body.appendChild(notification);
 
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 3000);
-        }
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 3000);
+    }
 
-        // System status functionality
-        function showSystemStatus() {
-            const status = {
-                database: 'Connected',
-                users: '<?php echo $stats['total_users']; ?> active',
-                storage: 'Available',
-                uptime: 'Running'
-            };
 
-            let statusMessage = 'System Status:\n';
-            statusMessage += `Database: ${status.database}\n`;
-            statusMessage += `Users: ${status.users}\n`;
-            statusMessage += `Storage: ${status.storage}\n`;
-            statusMessage += `Uptime: ${status.uptime}`;
+    function showSystemStatus() {
+        const status = {
+            database: 'Connected',
+            users: '<?php echo $stats['total_users']; ?> active',
+            storage: 'Available',
+            uptime: 'Running'
+        };
 
-            alert(statusMessage);
-        }
+        let statusMessage = 'System Status:\n';
+        statusMessage += `Database: ${status.database}\n`;
+        statusMessage += `Users: ${status.users}\n`;
+        statusMessage += `Storage: ${status.storage}\n`;
+        statusMessage += `Uptime: ${status.uptime}`;
 
-        // Auto-refresh stats every 5 minutes
-        setInterval(() => {
-            // In a real application, you would make an AJAX call to refresh stats
-            console.log('Auto-refreshing stats...');
-        }, 300000);
+        alert(statusMessage);
+    }
 
-        // Enhanced card interactions
-        document.addEventListener('DOMContentLoaded', function() {
-            const statCards = document.querySelectorAll('.stat-card');
+    setInterval(() => {
 
-            statCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-5px)';
-                    this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
-                });
+        console.log('Auto-refreshing stats...');
+    }, 300000);
 
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
-                });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const statCards = document.querySelectorAll('.stat-card');
+
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
             });
         });
+    });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl+K or Cmd+K to focus search
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                document.getElementById('quickSearch').focus();
-            }
 
-            // Escape to clear search
-            if (e.key === 'Escape') {
-                document.getElementById('quickSearch').value = '';
-                document.getElementById('quickSearch').blur();
-            }
-        });
+    document.addEventListener('keydown', function(e) {
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('quickSearch').focus();
+        }
+
+        if (e.key === 'Escape') {
+            document.getElementById('quickSearch').value = '';
+            document.getElementById('quickSearch').blur();
+        }
+    });
     </script>
 </body>
 

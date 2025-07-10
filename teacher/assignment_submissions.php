@@ -105,63 +105,63 @@ $stats = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/teacher.css">
     <style>
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
 
-    .stat-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        text-align: center;
-    }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
 
-    .stat-number {
-        font-size: 1.8rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
 
-    .stat-label {
-        font-size: 0.85rem;
-        opacity: 0.9;
-    }
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
 
-    .submission-content {
-        background: #f8fafc;
-        padding: 1rem;
-        border-radius: 6px;
-        margin: 0.5rem 0;
-        max-height: 150px;
-        overflow-y: auto;
-    }
+        .submission-content {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
 
-    .grade-form {
-        display: inline-flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
+        .grade-form {
+            display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
 
-    .grade-input {
-        width: 60px;
-        padding: 0.25rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
+        .grade-input {
+            width: 60px;
+            padding: 0.25rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
 
-    .feedback-input {
-        width: 200px;
-        padding: 0.25rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
+        .feedback-input {
+            width: 200px;
+            padding: 0.25rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
@@ -241,75 +241,75 @@ $stats = [
                 </div>
                 <div class="card-content">
                     <?php if (empty($submissions)): ?>
-                    <p style="text-align: center; color: #666; padding: 2rem;">
-                        No submissions yet for this assignment.
-                    </p>
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            No submissions yet for this assignment.
+                        </p>
                     <?php else: ?>
-                    <div class="submissions-list">
-                        <?php foreach ($submissions as $submission): ?>
-                        <div class="submission-item"
-                            style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid <?php echo $submission['score'] !== null ? '#10b981' : '#f59e0b'; ?>;">
-                            <div
-                                style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
-                                <div style="flex: 1;">
-                                    <h4 style="margin: 0 0 0.5rem 0;">
-                                        <?php echo htmlspecialchars($submission['student_name']); ?></h4>
-                                    <p style="margin: 0; color: #666; font-size: 0.9rem;">
-                                        <?php echo htmlspecialchars($submission['student_email']); ?> •
-                                        Submitted:
-                                        <?php echo date('M j, Y g:i A', strtotime($submission['submitted_at'])); ?>
-                                    </p>
-                                </div>
-                                <div>
-                                    <?php if ($submission['score'] !== null): ?>
-                                    <span class="badge badge-success">Graded:
-                                        <?php echo $submission['score']; ?>/<?php echo $assignment['max_marks']; ?></span>
-                                    <?php else: ?>
-                                    <span class="badge badge-warning">Pending Grade</span>
+                        <div class="submissions-list">
+                            <?php foreach ($submissions as $submission): ?>
+                                <div class="submission-item"
+                                    style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid <?php echo $submission['score'] !== null ? '#10b981' : '#f59e0b'; ?>;">
+                                    <div
+                                        style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 0.5rem 0;">
+                                                <?php echo htmlspecialchars($submission['student_name']); ?></h4>
+                                            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                                                <?php echo htmlspecialchars($submission['student_email']); ?> •
+                                                Submitted:
+                                                <?php echo date('M j, Y g:i A', strtotime($submission['submitted_at'])); ?>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <?php if ($submission['score'] !== null): ?>
+                                                <span class="badge badge-success">Graded:
+                                                    <?php echo $submission['score']; ?>/<?php echo $assignment['max_marks']; ?></span>
+                                            <?php else: ?>
+                                                <span class="badge badge-warning">Pending Grade</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <?php if (!empty($submission['submission_text'])): ?>
+                                        <div style="margin-bottom: 1rem;">
+                                            <strong>Text Submission:</strong>
+                                            <div class="submission-content">
+                                                <?php echo nl2br(htmlspecialchars($submission['submission_text'])); ?>
+                                            </div>
+                                        </div>
                                     <?php endif; ?>
+
+                                    <?php if (!empty($submission['file_path']) && file_exists($submission['file_path'])): ?>
+                                        <div style="margin-bottom: 1rem;">
+                                            <strong>File Submission:</strong>
+                                            <a href="<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank"
+                                                class="btn btn-sm btn-outline">
+                                                <i class="fas fa-download"></i> Download File
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+                                        <form class="grade-form"
+                                            onsubmit="gradeSubmission(event, <?php echo $submission['id']; ?>)">
+                                            <label>Score:</label>
+                                            <input type="number" class="grade-input" min="0"
+                                                max="<?php echo $assignment['max_marks']; ?>" step="0.1"
+                                                value="<?php echo $submission['score'] ?? ''; ?>" required>
+                                            <span>/<?php echo $assignment['max_marks']; ?></span>
+
+                                            <label style="margin-left: 1rem;">Feedback:</label>
+                                            <input type="text" class="feedback-input" placeholder="Optional feedback..."
+                                                value="<?php echo htmlspecialchars($submission['feedback'] ?? ''); ?>">
+
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <?php echo $submission['score'] !== null ? 'Update' : 'Grade'; ?>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <?php if (!empty($submission['submission_text'])): ?>
-                            <div style="margin-bottom: 1rem;">
-                                <strong>Text Submission:</strong>
-                                <div class="submission-content">
-                                    <?php echo nl2br(htmlspecialchars($submission['submission_text'])); ?>
-                                </div>
-                            </div>
-                            <?php endif; ?>
-
-                            <?php if (!empty($submission['file_path']) && file_exists($submission['file_path'])): ?>
-                            <div style="margin-bottom: 1rem;">
-                                <strong>File Submission:</strong>
-                                <a href="<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank"
-                                    class="btn btn-sm btn-outline">
-                                    <i class="fas fa-download"></i> Download File
-                                </a>
-                            </div>
-                            <?php endif; ?>
-
-                            <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
-                                <form class="grade-form"
-                                    onsubmit="gradeSubmission(event, <?php echo $submission['id']; ?>)">
-                                    <label>Score:</label>
-                                    <input type="number" class="grade-input" min="0"
-                                        max="<?php echo $assignment['max_marks']; ?>" step="0.1"
-                                        value="<?php echo $submission['score'] ?? ''; ?>" required>
-                                    <span>/<?php echo $assignment['max_marks']; ?></span>
-
-                                    <label style="margin-left: 1rem;">Feedback:</label>
-                                    <input type="text" class="feedback-input" placeholder="Optional feedback..."
-                                        value="<?php echo htmlspecialchars($submission['feedback'] ?? ''); ?>">
-
-                                    <button type="submit" class="btn btn-sm btn-primary">
-                                        <?php echo $submission['score'] !== null ? 'Update' : 'Grade'; ?>
-                                    </button>
-                                </form>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
-                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -317,49 +317,49 @@ $stats = [
     </div>
 
     <script>
-    function gradeSubmission(event, submissionId) {
-        event.preventDefault();
+        function gradeSubmission(event, submissionId) {
+            event.preventDefault();
 
-        const form = event.target;
-        const score = form.querySelector('.grade-input').value;
-        const feedback = form.querySelector('.feedback-input').value;
-        const button = form.querySelector('button');
-        const originalText = button.textContent;
+            const form = event.target;
+            const score = form.querySelector('.grade-input').value;
+            const feedback = form.querySelector('.feedback-input').value;
+            const button = form.querySelector('button');
+            const originalText = button.textContent;
 
-        button.textContent = 'Grading...';
-        button.disabled = true;
+            button.textContent = 'Grading...';
+            button.disabled = true;
 
-        const formData = new FormData();
-        formData.append('action', 'grade');
-        formData.append('submission_id', submissionId);
-        formData.append('score', score);
-        formData.append('feedback', feedback);
+            const formData = new FormData();
+            formData.append('action', 'grade');
+            formData.append('submission_id', submissionId);
+            formData.append('score', score);
+            formData.append('feedback', feedback);
 
-        fetch('assignment_submissions.php?assignment_id=<?php echo $assignment_id; ?>', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while grading the assignment');
-            })
-            .finally(() => {
-                button.textContent = originalText;
-                button.disabled = false;
-            });
-    }
+            fetch('assignment_submissions.php?assignment_id=<?php echo $assignment_id; ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while grading the assignment');
+                })
+                .finally(() => {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                });
+        }
     </script>
 </body>
 

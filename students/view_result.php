@@ -35,11 +35,10 @@ if (!$result) {
     exit;
 }
 
-// Check if question_order column exists
 $columns_check = $conn->query("SHOW COLUMNS FROM quiz_questions LIKE 'question_order'");
 $has_question_order = $columns_check && $columns_check->num_rows > 0;
 
-// Use appropriate ORDER BY clause based on column availability
+
 if ($has_question_order) {
     $questions_query = "SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY question_order, id";
 } else {

@@ -9,12 +9,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
 
 $teacher_id = $_SESSION['user_id'];
 
-// Get search and filter parameters
+
 $search = $_GET['search'] ?? '';
 $class_filter = $_GET['class'] ?? '';
 $subject_filter = $_GET['subject'] ?? '';
 
-// Build the query with filters
+
 $where_conditions = ["tsc.teacher_id = ?", "u.role = 'student'"];
 $params = [$teacher_id];
 $param_types = "i";
@@ -53,12 +53,11 @@ $students_stmt->bind_param($param_types, ...$params);
 $students_stmt->execute();
 $students = $students_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Group students and get additional data
 $grouped_students = [];
 foreach ($students as $student) {
     $student_id = $student['id'];
     if (!isset($grouped_students[$student_id])) {
-        // Get quiz and assignment stats for this student
+
         $quiz_stats_query = "SELECT
                             COUNT(*) as total_quizzes,
                             AVG(qs.percentage) as avg_score,
@@ -71,7 +70,6 @@ foreach ($students as $student) {
         $quiz_stats_stmt->execute();
         $quiz_stats = $quiz_stats_stmt->get_result()->fetch_assoc();
 
-        // Get assignment stats
         $assignment_stats_query = "SELECT
                                   COUNT(*) as total_assignments,
                                   AVG(asub.score) as avg_marks,
@@ -102,7 +100,7 @@ foreach ($students as $student) {
     ];
 }
 
-// Get filter options
+
 $classes_query = "SELECT DISTINCT c.id, c.name FROM classes c
                  JOIN teacher_subject_class tsc ON c.id = tsc.class_id
                  WHERE tsc.teacher_id = ? ORDER BY c.name";
@@ -129,11 +127,11 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <title>My Students - Teacher Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/teacher.css">
     <style>
-        /* Enhanced Students Page Styles */
         .students-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -184,7 +182,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             opacity: 0.8;
         }
 
-        /* Search and Filter Section */
+
         .search-filter-section {
             background: white;
             padding: 1.5rem;
@@ -265,7 +263,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
-        /* Students Grid */
+
         .students-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -338,7 +336,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             margin-top: 0.25rem;
         }
 
-        /* Performance Stats */
+
         .performance-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -367,7 +365,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             letter-spacing: 0.05em;
         }
 
-        /* Classes Section */
+
         .student-classes {
             margin-bottom: 1.5rem;
         }
@@ -400,7 +398,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             gap: 0.5rem;
         }
 
-        /* Action Buttons */
+
         .student-actions {
             display: flex;
             gap: 0.5rem;
@@ -445,7 +443,6 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -472,7 +469,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             font-size: 1rem;
         }
 
-        /* Responsive Design */
+
         @media (max-width: 768px) {
             .search-filter-grid {
                 grid-template-columns: 1fr;
@@ -538,9 +535,9 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </aside>
 
 
-        <!-- Main Content -->
+
         <main class="main-content">
-            <!-- Enhanced Header -->
+
             <div class="students-header">
                 <h1><i class="fas fa-users"></i> My Students</h1>
                 <p>Manage and track your students' academic progress across all your classes</p>
@@ -578,7 +575,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
             </div>
 
-            <!-- Search and Filter Section -->
+
             <div class="search-filter-section">
                 <form method="GET" action="">
                     <div class="search-filter-grid">
@@ -626,7 +623,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </form>
             </div>
 
-            <!-- Students Content -->
+
             <?php if (empty($grouped_students)): ?>
                 <div class="empty-state">
                     <i class="fas fa-user-graduate"></i>
@@ -648,7 +645,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 <div class="students-grid">
                     <?php foreach ($grouped_students as $student): ?>
                         <div class="student-card">
-                            <!-- Student Header -->
+
                             <div class="student-header">
                                 <div class="student-avatar">
                                     <?php echo strtoupper(substr($student['name'], 0, 1)); ?>
@@ -663,7 +660,6 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <!-- Performance Stats -->
                             <div class="performance-stats">
                                 <div class="stat-item">
                                     <div class="stat-value">
@@ -679,7 +675,6 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <!-- Classes Section -->
                             <div class="student-classes">
                                 <h4><i class="fas fa-book"></i> Enrolled Classes</h4>
                                 <div class="classes-list">
@@ -693,18 +688,14 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <!-- Action Buttons -->
                             <div class="student-actions">
-                                <a href="student_profile.php?id=<?php echo $student['id']; ?>"
-                                    class="action-btn primary">
+                                <a href="student_profile.php?id=<?php echo $student['id']; ?>" class="action-btn primary">
                                     <i class="fas fa-user"></i> Profile
                                 </a>
-                                <a href="student_grades.php?id=<?php echo $student['id']; ?>"
-                                    class="action-btn secondary">
+                                <a href="student_grades.php?id=<?php echo $student['id']; ?>" class="action-btn secondary">
                                     <i class="fas fa-chart-bar"></i> Grades
                                 </a>
-                                <a href="student_progress.php?id=<?php echo $student['id']; ?>"
-                                    class="action-btn tertiary">
+                                <a href="student_progress.php?id=<?php echo $student['id']; ?>" class="action-btn tertiary">
                                     <i class="fas fa-chart-line"></i> Progress
                                 </a>
                             </div>
@@ -716,20 +707,17 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
-        // Enhanced search functionality
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('search');
             const classFilter = document.getElementById('class');
             const subjectFilter = document.getElementById('subject');
 
-            // Auto-submit form on filter change
             [classFilter, subjectFilter].forEach(element => {
                 element.addEventListener('change', function() {
                     this.form.submit();
                 });
             });
 
-            // Search input with debounce
             let searchTimeout;
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
@@ -738,7 +726,7 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 }, 500);
             });
 
-            // Add loading animation to cards
+
             const cards = document.querySelectorAll('.student-card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
@@ -751,7 +739,6 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 }, index * 100);
             });
 
-            // Add hover effects to action buttons
             const actionBtns = document.querySelectorAll('.action-btn');
             actionBtns.forEach(btn => {
                 btn.addEventListener('mouseenter', function() {
@@ -763,22 +750,22 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 });
             });
 
-            // Add performance indicators
+
             const statValues = document.querySelectorAll('.stat-value');
             statValues.forEach(stat => {
                 const value = parseFloat(stat.textContent);
                 if (stat.textContent.includes('%')) {
                     if (value >= 80) {
-                        stat.style.color = '#16a34a'; // Green
+                        stat.style.color = '#16a34a';
                     } else if (value >= 60) {
-                        stat.style.color = '#f59e0b'; // Orange
+                        stat.style.color = '#f59e0b';
                     } else {
-                        stat.style.color = '#dc2626'; // Red
+                        stat.style.color = '#dc2626';
                     }
                 }
             });
 
-            // Add search highlighting
+
             function highlightSearchTerm() {
                 const searchTerm = searchInput.value.toLowerCase();
                 if (searchTerm.length > 0) {
@@ -798,21 +785,20 @@ $subjects = $subjects_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 }
             }
 
-            // Apply search highlighting if there's a search term
+
             if (searchInput.value) {
                 highlightSearchTerm();
             }
         });
 
-        // Add keyboard shortcuts
+
         document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + K to focus search
+
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 document.getElementById('search').focus();
             }
 
-            // Escape to clear search
             if (e.key === 'Escape') {
                 const searchInput = document.getElementById('search');
                 if (searchInput.value) {
